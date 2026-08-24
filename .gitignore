@@ -1,2 +1,28 @@
+# Dataset (too large for git — download from Canvas, see README)
+A2_FashionDataset/
 
-A2_FashionDataset
+# Generated artefacts
+cache/
+models/
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+PLAN.md
