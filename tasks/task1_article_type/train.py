@@ -622,7 +622,7 @@ def main():
         )
 
     print("\n" + "=" * 60)
-    print("TRAINING PIPELINE COMPLETED SUCCESSFULLY!")
+    print("TRAINING PIPELINE COMPLETED SUCCESSFULLY! ")
     print(f"Results logged to: {OUTPUT_DIR / 'results.csv'}")
     print(f"Model saved to:    {MODEL_DIR / f'cnn_{TARGET_VALUE}.keras'}")
     print(f"Encoder saved to:  {MODEL_DIR / f'label_encoder_{TARGET_VALUE}.joblib'}")
