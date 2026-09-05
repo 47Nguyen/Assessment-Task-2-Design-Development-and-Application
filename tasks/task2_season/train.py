@@ -1,65 +1,299 @@
 """
 Task 2: Fashion Season Classification (season)
-================================================
-Owner: Member 3
-Target: "season" (4 classes: Summer, Fall, Winter, Spring)
-
-MODEL: Random Forest on HOG + colour-histogram features, not the shared CNN.
-Task 1 uses build_cnn() and Task 3 uses an MLP, so per-task model choice is
-already how this team works. Random Forest fits this task specifically because
-season describes which catalogue an item shipped in, not what it looks like
-(see tasks/task2_season/README.md) - the goal is to show the ceiling is in the
-label, not in model capacity, and a cheap model reaching the same ceiling as an
-expensive one is itself evidence for that. Random Forest also hands us feature
-importances for free, which is exactly the "does colour explain most of it?"
-evidence the README asks for.
-
-Random Forest has no learning rate or filters, so the tuning experiments below
-use its own equivalents:
-    n_estimators  <- capacity, plays the role "filters" plays for a CNN
-    max_depth     <- model complexity, plays the role "dropout" plays for a CNN
-    class_weight  <- same idea as CNN class weighting, Spring is only 4% of the data
-
-HOW TO RUN:
-    From the project root folder:
-    python -m tasks.task2_season.train
-
-OPTIONS:
-    python -m tasks.task2_season.train --help
-    python -m tasks.task2_season.train --n-estimators 300 --max-depth 20
-    python -m tasks.task2_season.train --tune               # Run hyperparameter grid
-    python -m tasks.task2_season.train --skip-baselines     # Fast run without classical ML
 """
 
 import argparse
+from pathlib import Path
+
 import joblib
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from PIL import Image
 from skimage.color import rgb2gray
 from skimage.feature import hog
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-
-# these four imports are the "frozen" shared code everyone in the team uses -
-# they load the data, split it the same way for every task, and score models
-# the same way, so results across tasks/people are actually comparable
-from src.config import CACHE_DIR, MODEL_DIR, OUTPUT_DIR, SEED
-from src.data import get_split, load_metadata
-from src.evaluate import (
-    class_weights,
-    evaluate_model,
-    per_class_report,
-    plot_confusion,
+from sklearn.metrics import (
+    accuracy_score, balanced_accuracy_score, f1_score,
+    classification_report, confusion_matrix,
 )
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.utils.class_weight import compute_class_weight
 
-np.random.seed(SEED)
+SEED = 42
+
+# ROOT is the project root: this file sits at ROOT/tasks/task2_season/train.py
+ROOT = Path(__file__).resolve().parent.parent.parent
+DATA_ROOT = ROOT / "A2_FashionDataset" / "FashionDataset"
+TRAIN_CSV = DATA_ROOT / "train" / "styles_train.csv"
+TRAIN_IMAGES = DATA_ROOT / "train" / "images_train"
+
+CACHE_DIR = ROOT / "cache"
+MODEL_DIR = ROOT / "models"
+OUTPUT_DIR = ROOT / "outputs"
+for _d in (CACHE_DIR, MODEL_DIR, OUTPUT_DIR):
+    _d.mkdir(exist_ok=True)
+
+IMG_WIDTH = 60
+IMG_HEIGHT = 80
+IMG_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)
+
+STRATIFY_ON = "articleType"   # finest-grained label, balancing it roughly
+                              # balances the others through correlation
+VAL_SIZE = 0.2
+
+RESULTS_CSV = OUTPUT_DIR / "results.csv"
 
 TARGET_VALUE = "season"
-N_COLOR_FEATURES = 16 * 3   # 16-bin histogram x 3 RGB channels, used later to
-                            # split the feature vector back into "HOG part" and
-                            # "colour part" for the feature-importance chart
+N_COLOR_FEATURES = 16 * 3   # 16-bin histogram x 3 RGB channels
 
+
+def load_metadata(verbose=True):
+    # reads styles_train.csv, drops the junk trailing columns caused by stray
+    # commas in the file, keeps only rows that actually have a matching image
+    # on disk, and tags every row "train" or "val" so the split is fixed once
+    # and reused everywhere below
+    df = pd.read_csv(TRAIN_CSV)
+    n_raw = len(df)
+
+    df = df.drop(columns=[c for c in df.columns if c.startswith("Unnamed")])
+
+    on_disk = {p.stem for p in TRAIN_IMAGES.glob("*.jpg")}
+    df = df[df["id"].astype(str).isin(on_disk)].reset_index(drop=True)
+
+    df = _attach_split(df)
+
+    if verbose:
+        print(f"metadata: {n_raw} rows in CSV -> {len(df)} usable "
+              f"({n_raw - len(df)} dropped: no matching image)")
+        print(f"          {(df['_split'] == 'train').sum()} train / "
+              f"{(df['_split'] == 'val').sum()} val")
+    return df
+
+
+def _attach_split(df):
+    # stratified 80/20 split on articleType, same seed every run. a handful
+    # of articleType classes have only 1 example and can't be stratified -
+    # those rows go to train by default, which means they can never show up
+    # in validation (worth mentioning in the report, not a bug)
+    counts = df[STRATIFY_ON].value_counts()
+    too_rare = counts[counts < 2].index
+    rare_mask = df[STRATIFY_ON].isin(too_rare)
+
+    splittable = df[~rare_mask]
+    train_idx, val_idx = train_test_split(
+        splittable.index,
+        test_size=VAL_SIZE,
+        random_state=SEED,
+        stratify=splittable[STRATIFY_ON],
+    )
+
+    df = df.copy()
+    df["_split"] = "train"
+    df.loc[val_idx, "_split"] = "val"
+    return df
+
+
+def _build_image_cache(ids, image_dir, cache_path):
+    # decodes every jpg in image_dir into one big uint8 array and saves it to
+    # disk - slow the first time (~1-2 minutes for the full dataset), instant
+    # every run after that. ~38.6k x 80 x 60 x 3 uint8 is about 550 MB.
+    print(f"building image cache -> {cache_path.name} ({len(ids)} images, one-off)")
+    arr = np.empty((len(ids), *IMG_SHAPE), dtype=np.uint8)
+    n_grey, n_resized = 0, 0
+    for i, img_id in enumerate(ids):
+        with Image.open(image_dir / f"{img_id}.jpg") as im:
+            # ~0.9% of files are grayscale - without converting, they come
+            # back 2-D and break when stacked with the RGB ones
+            if im.mode != "RGB":
+                im = im.convert("RGB")
+                n_grey += 1
+            # most images are a uniform 60x80, a handful are not
+            if im.size != (IMG_WIDTH, IMG_HEIGHT):
+                im = im.resize((IMG_WIDTH, IMG_HEIGHT), Image.BILINEAR)
+                n_resized += 1
+            arr[i] = np.asarray(im)
+        if (i + 1) % 10000 == 0:
+            print(f"  {i + 1}/{len(ids)}")
+    print(f"  done: {n_grey} grayscale converted, {n_resized} resized to "
+          f"{IMG_WIDTH}x{IMG_HEIGHT}")
+    np.save(cache_path, arr)
+    return arr
+
+
+def load_images(ids):
+    # returns decoded uint8 images for the given ids, building/reusing the
+    # on-disk cache so repeated runs don't re-read every jpg from scratch
+    ids = [str(i) for i in ids]
+    cache_path = CACHE_DIR / "images_train.npy"
+    index_path = CACHE_DIR / "index_train.npy"
+
+    if cache_path.exists() and index_path.exists():
+        cached_ids = np.load(index_path, allow_pickle=True)
+        arr = np.load(cache_path, mmap_mode="r")
+        lookup = {img_id: i for i, img_id in enumerate(cached_ids)}
+        return np.stack([arr[lookup[i]] for i in ids])
+
+    all_ids = sorted(p.stem for p in TRAIN_IMAGES.glob("*.jpg"))
+    arr = _build_image_cache(all_ids, TRAIN_IMAGES, cache_path)
+    np.save(index_path, np.array(all_ids, dtype=object))
+    lookup = {img_id: i for i, img_id in enumerate(all_ids)}
+    return np.stack([arr[lookup[i]] for i in ids])
+
+
+def get_split(target, verbose=True):
+    # the one function every task calls - loads the raw images and labels for
+    # `target`, using the same train/val row assignment as every other task.
+    # returns (X_train, X_val, y_train, y_val, label_encoder). Random Forest
+    # works on raw uint8 images here because extract_features() below turns
+    # them into HOG/colour features itself - there's no CNN-style pixel
+    # normalisation step needed.
+    df = load_metadata(verbose=False)
+
+    n_before = len(df)
+    df = df[df[target].notna()].reset_index(drop=True)
+    if verbose and n_before != len(df):
+        print(f"{target}: dropped {n_before - len(df)} rows with a missing label")
+
+    le = LabelEncoder().fit(df[target])
+    joblib.dump(le, MODEL_DIR / f"label_encoder_{target}.joblib")
+
+    tr = df[df["_split"] == "train"]
+    va = df[df["_split"] == "val"]
+
+    X_train = load_images(tr["id"])
+    X_val = load_images(va["id"])
+    y_train = le.transform(tr[target])
+    y_val = le.transform(va[target])
+
+    if verbose:
+        print(f"{target}: {len(le.classes_)} classes | "
+              f"train {X_train.shape[0]} / val {X_val.shape[0]} | "
+              f"majority baseline {pd.Series(y_train).value_counts(normalize=True).iloc[0]:.3f}")
+    return X_train, X_val, y_train, y_val, le
+
+
+def majority_baseline(y):
+    return float(pd.Series(y).value_counts(normalize=True).iloc[0])
+
+
+def evaluate_model(y_true, y_pred, target, model_name, notes=""):
+    # scores a model and appends/updates one row in outputs/results.csv -
+    # macro-F1 is the headline number because accuracy alone can look good
+    # while a model has just learned to always guess the biggest class
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+
+    baseline = majority_baseline(y_true)
+    accuracy = accuracy_score(y_true, y_pred)
+    macro_f1 = f1_score(y_true, y_pred, average="macro", zero_division=0)
+
+    row = {
+        "target": target,
+        "model": model_name,
+        "macro_f1": macro_f1,
+        "balanced_acc": balanced_accuracy_score(y_true, y_pred),
+        "accuracy": accuracy,
+        "majority_baseline": baseline,
+        "beats_baseline": accuracy > baseline,
+        "notes": notes,
+    }
+
+    print(f"\n{model_name}  ({target})")
+    print(f"  macro-F1      {macro_f1:.4f}   <- main metric")
+    print(f"  balanced acc  {row['balanced_acc']:.4f}")
+    print(f"  accuracy      {accuracy:.4f}  (baseline {baseline:.4f})")
+
+    if not row["beats_baseline"]:
+        print("  WARNING: does not beat the majority-class baseline")
+    if accuracy - macro_f1 > 0.25:
+        print(f"  NOTE: accuracy is {accuracy - macro_f1:.2f} higher than macro-F1 - "
+              f"the model is probably just predicting the common classes")
+
+    _save_result(row)
+    return row
+
+
+def _save_result(row):
+    # keeps outputs/results.csv as one row per (target, model) combo - running
+    # the same model_name twice replaces the old row instead of duplicating it
+    df = pd.DataFrame([row])
+    if RESULTS_CSV.exists():
+        old = pd.read_csv(RESULTS_CSV)
+        old = old[~((old["target"] == row["target"]) & (old["model"] == row["model"]))]
+        df = pd.concat([old, df], ignore_index=True)
+    df.to_csv(RESULTS_CSV, index=False)
+
+
+def per_class_report(y_true, y_pred, label_encoder, top_n=None):
+    # precision/recall/F1 broken down per class, worst recall first - this is
+    # where a class that the model basically ignores becomes visible
+    report = classification_report(
+        y_true, y_pred,
+        labels=np.arange(len(label_encoder.classes_)),
+        target_names=list(label_encoder.classes_),
+        output_dict=True,
+        zero_division=0,
+    )
+    df = pd.DataFrame(report).T
+    df = df.drop(index=[i for i in ("accuracy", "macro avg", "weighted avg")
+                        if i in df.index])
+    df = df.sort_values("recall")
+    return df.head(top_n) if top_n else df
+
+
+def plot_confusion(y_true, y_pred, label_encoder, target, max_classes=25):
+    # confusion matrix normalised by row (so each row sums to 1 = "of the
+    # items that were truly class X, what fraction got predicted as what")
+    import seaborn as sns
+
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+
+    classes = np.arange(len(label_encoder.classes_))
+    title = target
+
+    if len(classes) > max_classes:
+        keep = pd.Series(y_true).value_counts().head(max_classes).index.values
+        mask = np.isin(y_true, keep) & np.isin(y_pred, keep)
+        y_true, y_pred = y_true[mask], y_pred[mask]
+        classes = np.sort(keep)
+        title = f"{target} - top {max_classes} classes"
+
+    names = [label_encoder.classes_[i] for i in classes]
+
+    cm = confusion_matrix(y_true, y_pred, labels=classes).astype(float)
+    cm = cm / np.maximum(cm.sum(axis=1, keepdims=True), 1)
+
+    size = max(6, len(classes) * 0.42)
+    fig, ax = plt.subplots(figsize=(size, size * 0.85))
+    sns.heatmap(cm, xticklabels=names, yticklabels=names, cmap="Blues",
+                vmin=0, vmax=1, annot=len(classes) <= 10, fmt=".2f",
+                square=True, ax=ax)
+    ax.set_xlabel("predicted")
+    ax.set_ylabel("true")
+    ax.set_title(title)
+    plt.tight_layout()
+
+    path = OUTPUT_DIR / f"confusion_{target}.png"
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    print(f"saved {path}")
+    return fig
+
+
+def class_weights(y):
+    # weights that make rare classes (Spring is only ~4% of the data) count
+    # for more during training, so the model doesn't just ignore them
+    classes = np.unique(y)
+    weights = compute_class_weight("balanced", classes=classes, y=np.asarray(y))
+    return dict(zip(classes.tolist(), weights.tolist()))
+
+
+# ===========================================================================
+# Task 2 specific code starts here
+# ===========================================================================
 
 def extract_features(images, split_name="train"):
     # turns a stack of raw images into a table of numbers a classic ML model
@@ -385,11 +619,7 @@ def main():
     print("TASK 2: SEASON CLASSIFICATION — TRAINING PIPELINE")
     print(f"Target: {TARGET_VALUE}")
 
-    # normalised=False because the Random Forest trains on HOG/colour features
-    # built from the original 0-255 pixel values, not the CNN's standardised
-    # ones - HOG and colour histograms expect the raw image
-    X_train_raw, X_val_raw, y_train, y_val, label_encoder = get_split(
-        TARGET_VALUE, normalised=False)
+    X_train_raw, X_val_raw, y_train, y_val, label_encoder = get_split(TARGET_VALUE)
 
     print("\n[Data Summary]")
     print(f"  Train images: {X_train_raw.shape} (dtype: {X_train_raw.dtype})")
