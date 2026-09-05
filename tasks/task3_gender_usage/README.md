@@ -1,113 +1,121 @@
-# Task 3 — Gender & Occasion Classification (`gender`, `usage`)
+# Task 3: Fashion Gender and Usage (MLP)
 
-**Owner: M3** · Report section 3.3
+Task 3 predicts **both** catalogue `gender` (5 classes) and `usage` (8 classes)
+from a product image. Two independently trained MLPs keep these targets separate.
+These labels describe product marketing, not a person's gender identity.
 
-> Two questions from the same image: who is this item for, and what occasion is
-> it suitable for?
+## Start in VSCode
 
-The assignment lets you treat these as two separate models or one combined
-class. **Two separate models is simpler** — just run the same script twice with
-a different target. Whichever you pick, justify it in the report.
+1. Open the repository folder and select its Python 3.11 `.venv` interpreter.
+2. Install the existing root requirements if needed: `python -m pip install -r requirements.txt`.
+3. Open `tasks/task3_gender_usage/task3.ipynb`, select the same kernel and Run All.
+4. The notebook uses `MODE = "train"` by default. Use `"review"` with an existing
+   `RUN_DIR` to inspect a completed run without training again, or `"smoke"` for a small check.
 
-## Start here
+Dataset layout from the repository root:
 
-```bash
-cp ../_template.py train_gender.py
-cp ../_template.py train_usage.py
+```text
+A2_FashionDataset/FashionDataset/
+  train/styles_train.csv
+  train/images_train/<id>.jpg
+  test/styles_prediction.csv
+  test/images_test/<id>.jpg
 ```
 
-Set `target_value = "gender"` in one and `target_value = "usage"` in the other.
+No GPU, downloads or pretrained model weights are required. CPU time depends on
+the machine. The full experiment trains six candidate MLPs plus one optional
+merged-label experiment, up to 20 epochs each with early stopping. Raw images
+are held as compact uint8 arrays; the model normalizes pixels internally.
 
-## `gender` — what the data looks like
+## Command-Line Alternatives
 
-| Class | Images | Share |
-|---|---:|---:|
-| Men | 20,918 | 54.2% |
-| Women | 14,160 | 36.7% |
-| Unisex | 2,080 | 5.4% |
-| Boys | 814 | 2.1% |
-| Girls | 645 | 1.7% |
+Run from the repository root:
 
-- 5 classes, no missing labels
-- **Baseline to beat: 0.542**
+```powershell
+python -m tasks.task3_gender_usage.train --smoke
+python -m tasks.task3_gender_usage.train --run-dir outputs/task3/my_full_run
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/my_full_run/models --output outputs/task3/my_full_run/styles_prediction_task3.csv
+```
 
-**Expect this:** Men and Women will work reasonably well. Unisex, Boys and Girls
-will do badly, because:
-- "Unisex" is about intent, not appearance — nothing in the image says it
-- Boys/Girls items are basically adult items in smaller sizes, and you can't
-  tell size from a cropped product photo
+A run never overwrites another run. Choose a new run name when retraining.
+`--smoke` uses a small stratified subset and two epochs; its scores are **not report results**.
+The notebook's upload widget demonstrates both predictions using the same
+`Task3Predictor` API as the command-line script. Scores are not calibrated confidence.
 
-If that's what you find, it's worth arguing in the report that a
-**Men / Women / Other** 3-class version is the more honest model. Test it and
-compare.
+## What The Experiment Does
 
-## `usage` — what the data looks like
+- Audits all train/test images: missing files, unreadable images, grayscale,
+  unusual dimensions, missing labels, exact decoded-RGB duplicates and conflicting labels.
+- Converts to RGB and resizes to 32 high x 24 wide, preserving the usual 4:3 aspect ratio.
+- Uses one deterministic, approximately 70/15/15 train/validation/holdout split
+  for both targets. Exact duplicate groups stay together. Joint gender/usage
+  strata with fewer than three groups, and target-conflicting groups, stay in train.
+  Reports the resulting coverage; `Home` cannot have a meaningful holdout score.
+- Compares a majority predictor, a sigmoid MLP, a deeper ReLU/dropout MLP and
+  the same deeper MLP with capped square-root inverse-frequency training weights.
+- Selects epochs and the final MLP using **validation** macro-F1 only; evaluates
+  only the selected original-label MLP on holdout. Holdout never drives tuning.
+- Reports accuracy, fixed-vocabulary macro-F1, supported-class macro-F1, weighted F1,
+  per-class support, confusion matrices, errors, training curves and batch latency.
+- Tests merging rare usage labels separately: compare retrained five-class
+  predictions with the eight-class model's probabilities folded to the **same**
+  five labels, on the **same** images. Final submissions retain all eight labels.
+- Saves models and class mappings, checks save/reload equivalence, and creates
+  a new CSV preserving official ID order and all non-Task-3 columns.
 
-| Class | Images | Share |
-|---|---:|---:|
-| Casual | 29,641 | 76.8% |
-| Sports | 3,940 | 10.2% |
-| Ethnic | 2,570 | 6.7% |
-| Formal | 2,300 | 6.0% |
-| Smart Casual | 55 | 0.1% |
-| Travel | 25 | 0.1% |
-| Party | 13 | <0.1% |
-| Home | 1 | <0.1% |
+The sigmoid-to-deeper comparison changes several architectural settings together;
+it is an approach comparison, not proof of which single setting caused a difference.
+The weighted-versus-unweighted deeper models isolate class weighting.
 
-- 8 classes, 72 rows have no usage label (dropped automatically)
-- **Baseline to beat: 0.769** accuracy
+## Files And Outputs
 
-> **This is the clearest example of why accuracy is the wrong metric.**
->
-> Always predicting "Casual" gets you **76.8% accuracy** and learns nothing.
-> Meanwhile the macro-F1 ceiling is only **0.50** — if you got the four real
-> classes perfect and zero on the four tiny ones, that's 4/8.
->
-> Accuracy floor 0.769, macro-F1 ceiling 0.500. **Those numbers cross over.**
-> That single fact is worth a paragraph in the report on its own.
+`data.py` handles auditing, splitting and image preprocessing. `train.py` handles
+experiments and evaluation. `predict.py` exposes reloadable inference and notebook upload.
+The notebook presents the analysis and calls those same functions, without duplicated training code.
 
-**Worth testing:** merge Smart Casual / Travel / Party / Home into "Other" and
-train a 5-class model. Does an honest 5-class model beat a broken 8-class one?
+Each run is isolated under `outputs/task3/<run>/` (already gitignored):
 
-## Steps
+| Output | Purpose |
+| --- | --- |
+| `audit.json`, `audit_images_*.csv` | Actual dataset checks |
+| `split_manifest.csv`, `class_coverage.csv` | Reproduce the split and inspect rare labels |
+| `results_task3.csv`, `selected_models.json` | Comparisons and evidence-based selection |
+| `*_report.csv`, `*_confusion.png`, `*_errors.png`, `*_learning.png` | Report evidence |
+| `models/gender_final.keras`, `models/usage_final.keras` | Reloadable selected models |
+| `models/*_final.json`, `config.json`, `provenance.json` | Classes, preprocessing and reproducibility |
+| `styles_prediction_task3.csv` | Task 3 contribution, **not** a complete team submission |
 
-For each target:
+Model files are gitignored, but must be included in the final assignment ZIP.
+Do not upload data, models, predictions or code until the owner reviews them.
 
-1. **Baseline** — always predict the biggest class. Log it.
-2. **Train the CNN** with `build_cnn()`.
-3. **Always report accuracy AND macro-F1 together.** The gap is the finding.
-4. **Per-class recall table** — `per_class_report()` shows which classes get
-   ignored completely.
-5. **Confusion matrix** for each.
-6. **Try the simplified version** — 3-class gender, 5-class usage — and compare.
+## Integration And Limitations
 
-## The story these two tasks tell together
+The root README currently references a deleted `src` package. This Task 3 pipeline
+does not restore it or change Tasks 1/2/4. Its split is explicit and saved; it is
+**not** the old shared split. Teammates must align row IDs before claiming controlled
+comparisons across tasks. Using the same seed alone does not produce the same split.
 
-Season, gender and usage all share one finding: **these labels aren't fully
-recoverable from a 60×80 product photo.** Season is a catalogue decision, Unisex
-is intent, and usage is 77% one class.
+Flattening preserves pixel positions; it does not erase image information. MLPs
+can learn spatial patterns, but lack CNN locality/weight-sharing and are sensitive
+to alignment. Low image resolution and marketing labels limit generalization.
+Exact hashing does not catch near duplicates. Tiny validation classes have noisy
+scores; absent classes are explicitly counted as zero in fixed-vocabulary macro-F1,
+not claimed to have been independently tested.
 
-You own all three, so you can tell that as one connected argument rather than
-three disconnected paragraphs. That's the main reason these tasks are grouped
-under one person.
+An untouched holdout is an **internal** generalization check. It is not external
+real-world validation. The notebook discusses related published work, but it uses
+different datasets/labels and cannot justify a direct numerical benchmark claim.
+Team members still need independently labelled external product images for a
+credible deployment claim; do not guess labels from appearance or call the blind
+assignment test set a labelled evaluation set.
 
-## Watch out for
+## Sources
 
-- Never report accuracy alone on `usage`. It's misleading and a marker will
-  notice.
-- Don't merge the tiny classes inside `src/data.py` — keep it as an experiment
-  so you can compare against the unmerged version.
+- [TensorFlow EarlyStopping](https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/EarlyStopping)
+- [scikit-learn F1 definitions](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html)
+- [Liu et al., DeepFashion (CVPR 2016)](https://openaccess.thecvf.com/content_cvpr_2016/html/Liu_DeepFashion_Powering_Robust_CVPR_2016_paper.html)
+- [Zakizadeh et al., Improving the Annotation of DeepFashion Images (2018)](https://arxiv.org/abs/1807.11674)
 
-## Checklist
-
-- [ ] Baselines logged for both targets
-- [ ] CNN trained and logged for both
-- [ ] Accuracy and macro-F1 reported side by side
-- [ ] Per-class recall tables
-- [ ] Confusion matrices saved
-- [ ] Simplified versions tested and compared
-- [ ] Models saved to `models/cnn_gender.keras` and `models/cnn_usage.keras`
-- [ ] Notes written for the report
-
-**After this:** you'll finish before the others, so you take the demo app
-(needed for HD/DI).
+Review and understand the code and verify the course's AI-use/disclosure rules
+before submitting. This Task 3 implementation does not complete the team's
+five-page report, Tasks 1/2/4, or a combined application automatically.
