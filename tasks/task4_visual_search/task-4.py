@@ -50,7 +50,7 @@ def preprocess_image(filename):
     """
     image_string = tf.io.read_file(filename)
     image = tf.image.decode_jpeg(image_string, channels=3)
-    image = tf.image.convert_image_dtype(image, tf.float32)
+    image = tf.cast(image, tf.float32) / 255.0
     image = tf.image.resize(image, target_shape)
     return image
 
@@ -127,36 +127,15 @@ def embedding_model():
 
     return model
 
+def split_data(df):
+    counts = df['articleType'].value_counts()
+    keep = counts[counts >= 2].index
+    df = df[df['articleType'].isin(keep)] 
+    
+    train_df, val_df = train_test_split(df,test_size=0.2,stratify=df['articleType'], random_state=42,
+    )
+    return train_df, val_df
 
-
-## Build the triplet tf.data pipeline
-def make_triplet_dataset(anchors, references, disimilars, batch_size=32):
-    dataset = tf.data.Dataset.from_tensor_slices((anchors, references, disimilars))
-    dataset = dataset.shuffle(buffer_size=1024)
-    dataset = dataset.map(preprocess_triplets)
-    dataset = dataset.batch(batch_size)
-    dataset = dataset.prefetch(tf.data.AUTOTUNE)
-    return dataset
-
-
-## Triplet loss training step
-## loss = max(distance(anchor, reference) - distance(anchor, disimilar) + margin, 0)
-def train_step(model, optimizer, anchor_img, reference_img, disimilar_img, margin=0.5):
-    with tf.GradientTape() as tape:
-        anchor_emb = model(anchor_img, training=True)
-        reference_emb = model(reference_img, training=True)
-        disimilar_emb = model(disimilar_img, training=True)
-
-        d_pos = tf.reduce_sum(tf.square(anchor_emb - reference_emb), axis=-1)
-        d_neg = tf.reduce_sum(tf.square(anchor_emb - disimilar_emb), axis=-1)
-        loss = tf.reduce_mean(tf.maximum(d_pos - d_neg + margin, 0.0))
-
-    gradients = tape.gradient(loss, model.trainable_weights)
-    optimizer.apply_gradients(zip(gradients, model.trainable_weights))
-    return loss
-
-
-def train_embedding_model(model, dataset, epochs=10, learning_rate=1e-4):
     optimizer = tf.keras.optimizers.Adam(learning_rate)
     for epoch in range(epochs):
         for anchor_img, reference_img, disimilar_img in dataset:
@@ -165,9 +144,12 @@ def train_embedding_model(model, dataset, epochs=10, learning_rate=1e-4):
     return model
 
 
-anchors, references, disimilars = anchor_references(df_train)
-train_dataset = make_triplet_dataset(anchors, references, disimilars)
+# anchors, references, disimilars = anchor_references(df_train)
+# train_dataset = make_triplet_dataset(anchors, references, disimilars)
 
-model = embedding_model()
-model = train_embedding_model(model, train_dataset)
-    
+# model = embedding_model()
+# model = train_embedding_model(model, train_dataset)
+
+embedding_model().summary()
+
+
