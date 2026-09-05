@@ -1,6 +1,5 @@
 # ===========================================================================
 # TASK 1 (ARTICLE TYPE CLASSIFICATION) 
-# This script has been adjusted to run without the 'src' folder (frozen APIs).
 # All data loading, cleaning, CNN building, and evaluation logic are now local.
 # ===========================================================================
 
