@@ -1,5 +1,5 @@
 # ===========================================================================
-# TASK 1 (ARTICLE TYPE CLASSIFICATION) - 100% SELF-CONTAINED TRAINING SCRIPT
+# TASK 1 (ARTICLE TYPE CLASSIFICATION) 
 # This script has been adjusted to run without the 'src' folder (frozen APIs).
 # All data loading, cleaning, CNN building, and evaluation logic are now local.
 # ===========================================================================
@@ -139,30 +139,70 @@ def get_split_self_contained(target_value="articleType", normalised=True, verbos
 # ---------------------------------------------------------------------------
 # 3. Self-contained replacements for models & callbacks
 # ---------------------------------------------------------------------------
-def build_cnn(n_classes, filters=(32, 64, 128), dropout=0.3):
+def build_cnn(n_classes, dropout=0.4):
     """
-    Self-contained CNN Builder.
-    Replaces build_cnn() from src.models.
+    Transfer Learning model using MobileNetV2 as frozen backbone.
+    Input shape: (96, 96, 3) — upsampled at runtime via a Resizing layer.
+    The base MobileNetV2 weights are frozen; only the classification head is trained.
+    After initial training, call fine_tune_cnn() to unfreeze the top layers.
     """
     from tensorflow.keras import layers, models
+    from tensorflow.keras.applications import MobileNetV2
+    
+    # Data Augmentation (applied only during training)
+    augmentation = tf.keras.Sequential([
+        layers.RandomFlip("horizontal"),
+        layers.RandomRotation(0.08),
+        layers.RandomZoom(0.1),
+        layers.RandomContrast(0.1),
+    ], name="augmentation")
     
     inputs = layers.Input(shape=(80, 60, 3), name="image")
-    x = inputs
     
-    for i, f in enumerate(filters):
-        x = layers.Conv2D(f, (3, 3), padding='same', name=f"conv{i}")(x)
-        x = layers.BatchNormalization(name=f"bn{i}")(x)
-        x = layers.Activation('relu', name=f"relu{i}")(x)
-        x = layers.MaxPooling2D((2, 2), name=f"pool{i}")(x)
-        
+    # Upsample to MobileNetV2 minimum input (96x96)
+    x = layers.Resizing(96, 96, name="resize")(inputs)
+    
+    # Augmentation (active only during model.fit)
+    x = augmentation(x)
+    
+    # MobileNetV2 backbone (pretrained on ImageNet, frozen)
+    base_model = MobileNetV2(
+        input_shape=(96, 96, 3),
+        include_top=False,
+        weights='imagenet'
+    )
+    base_model.trainable = False  # Freeze backbone initially
+    
+    x = base_model(x, training=False)
     x = layers.GlobalAveragePooling2D(name="gap")(x)
-    x = layers.Dense(128, activation='relu', name="embedding")(x)
+    x = layers.Dense(256, activation='relu', name="embedding")(x)
+    x = layers.BatchNormalization(name="head_bn")(x)
     x = layers.Dropout(dropout, name="dropout")(x)
     outputs = layers.Dense(n_classes, activation='softmax', name="prediction")(x)
     
     return models.Model(inputs=inputs, outputs=outputs, name="cnn_articleType")
 
-def get_default_callbacks(target_value, patience=5):
+
+def fine_tune_cnn(model, unfreeze_from_layer=-30, learning_rate=5e-5):
+    """
+    Unfreeze the top layers of MobileNetV2 for fine-tuning.
+    Call this after initial head training converges.
+    """
+    base_model = model.get_layer("mobilenetv2_1.00_96")
+    base_model.trainable = True
+    
+    # Freeze everything except the last N layers
+    for layer in base_model.layers[:unfreeze_from_layer]:
+        layer.trainable = False
+    
+    model.compile(
+        optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learning_rate),
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    return model
+
+def get_default_callbacks(target_value, patience=6):
     """
     Self-contained Callbacks Generator.
     Replaces default_callbacks() from src.models.
@@ -179,6 +219,13 @@ def get_default_callbacks(target_value, patience=5):
             filepath=checkpoint_path,
             monitor='val_loss',
             save_best_only=True,
+            verbose=1
+        ),
+        tf.keras.callbacks.ReduceLROnPlateau(
+            monitor='val_loss',
+            factor=0.4,
+            patience=3,
+            min_lr=1e-6,
             verbose=1
         )
     ]
@@ -326,30 +373,49 @@ def main():
         evaluate_model(y_val, y_pred_svm, target_value, "linear_svm", 
                        notes="SGDClassifier with hinge loss on HOG+ColorHist")
 
-    # Step 3: CNN Baseline
-    print("\n--- Step 3: Training Baseline CNN Model ---")
-    from tensorflow.keras.optimizers import Adam
+    # Step 3: CNN with Transfer Learning (MobileNetV2)
+    print("\n--- Step 3: Training CNN with Transfer Learning (MobileNetV2) ---")
     
     model = build_cnn(n_classes=n_classes)
     
-    # Compute capped weights to avoid gradient explosion
-    weights_dict = compute_capped_class_weights(y_train, max_weight_cap=10.0)
+    # Compute capped class weights
+    weights_dict = compute_capped_class_weights(y_train, max_weight_cap=8.0)
     
-    model.compile(optimizer=Adam(learning_rate=1e-3),
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
-        
-    print("Starting Reference CNN Training...")
-    model.fit(X_train, y_train, 
-              validation_data=(X_val, y_val), 
-              epochs=args.epochs, 
-              batch_size=args.batch_size, 
-              class_weight=weights_dict,
-              callbacks=get_default_callbacks(target_value))
+    # Phase 1: Train classification head only (frozen backbone)
+    print("Phase 1: Training classification head (backbone frozen)...")
+    model.compile(
+        optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=1e-3),
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+    
+    phase1_epochs = min(args.epochs, 15)
+    history = model.fit(
+        X_train, y_train,
+        validation_data=(X_val, y_val),
+        epochs=phase1_epochs,
+        batch_size=args.batch_size,
+        class_weight=weights_dict,
+        callbacks=get_default_callbacks(target_value, patience=5)
+    )
+    
+    # Phase 2: Fine-tune top layers of MobileNetV2
+    remaining_epochs = args.epochs - phase1_epochs
+    if remaining_epochs > 0:
+        print("\nPhase 2: Fine-tuning top MobileNetV2 layers...")
+        model = fine_tune_cnn(model, unfreeze_from_layer=-30, learning_rate=3e-5)
+        model.fit(
+            X_train, y_train,
+            validation_data=(X_val, y_val),
+            epochs=remaining_epochs,
+            batch_size=args.batch_size,
+            class_weight=weights_dict,
+            callbacks=get_default_callbacks(target_value, patience=6)
+        )
     
     y_pred_cnn = model.predict(X_val).argmax(axis=1)
-    evaluate_model(y_val, y_pred_cnn, target_value, "cnn_baseline", 
-                   notes="lr 1e-3, local architecture")
+    evaluate_model(y_val, y_pred_cnn, target_value, "cnn_baseline",
+                   notes="MobileNetV2 Transfer Learning + fine-tune")
     
     model.save("models/cnn_articleType.keras")
     print("CNN model successfully saved to: models/cnn_articleType.keras")
@@ -358,39 +424,36 @@ def main():
     if args.tune:
         print("\n--- Step 4: Running Hyperparameter Tuning (OFAAT) ---")
         
-        lr_candidates = [1e-2, 1e-3, 1e-4]
-        filter_candidates = [(32, 64), (32, 64, 128), (64, 128, 256)]
-        dropout_candidates = [0.2, 0.3, 0.5]
+        lr_candidates = [1e-3, 5e-4, 1e-4]
+        dropout_candidates = [0.3, 0.4, 0.5]
         
-        def run_tuning_experiment(lr=1e-3, filters=(32, 64, 128), dropout=0.3, run_name="cnn_tuned"):
-            print(f"\nTuning: {run_name} (lr={lr}, filters={filters}, dropout={dropout})")
-            m = build_cnn(n_classes=n_classes, filters=filters, dropout=dropout)
-            m.compile(optimizer=Adam(learning_rate=lr),
-                      loss='sparse_categorical_crossentropy',
-                      metrics=['accuracy'])
+        def run_tuning_experiment(lr=1e-3, dropout=0.4, run_name="cnn_tuned"):
+            print(f"\nTuning: {run_name} (lr={lr}, dropout={dropout})")
+            m = build_cnn(n_classes=n_classes, dropout=dropout)
+            m.compile(
+                optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=lr),
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy']
+            )
             
             # Fast train 10 epochs for comparison
-            m.fit(X_train, y_train, 
-                  validation_data=(X_val, y_val), 
-                  epochs=10, 
-                  batch_size=args.batch_size, 
+            m.fit(X_train, y_train,
+                  validation_data=(X_val, y_val),
+                  epochs=10,
+                  batch_size=args.batch_size,
                   class_weight=weights_dict,
                   callbacks=[tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)])
             
             y_pred_exp = m.predict(X_val).argmax(axis=1)
-            evaluate_model(y_val, y_pred_exp, target_value, run_name, 
-                           notes=f"lr={lr}, filters={filters}, dropout={dropout}")
+            evaluate_model(y_val, y_pred_exp, target_value, run_name,
+                           notes=f"lr={lr}, dropout={dropout}")
             return m
 
         # 1. Tuning Learning Rate
         for lr in lr_candidates:
             run_tuning_experiment(lr=lr, run_name=f"cnn_lr_{str(lr).replace('.', '_')}")
             
-        # 2. Tuning Filters
-        for filters in filter_candidates:
-            run_tuning_experiment(filters=filters, run_name=f"cnn_filters_{'_'.join(map(str, filters))}")
-            
-        # 3. Tuning Dropout
+        # 2. Tuning Dropout
         for d in dropout_candidates:
             run_tuning_experiment(dropout=d, run_name=f"cnn_dropout_{str(d).replace('.', '_')}")
             
