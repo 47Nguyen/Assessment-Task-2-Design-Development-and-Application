@@ -239,14 +239,14 @@ def show_results(query_path, results):
         plt.title(row['articleType'], fontsize = 8)
         plt.axis('off')
 
-    plt.savefig('tasks/task4_visual_search/outputs/task4_query_grid.png', bbox_inches = 'tight')
+    plt.savefig('outputs/task_4/task4_query_grid.png', bbox_inches = 'tight')
     plt.close()
 
-MODEL_FILE = 'tasks/task4_visual_search/models/embedding_visual_search.keras'
-INDEX_FILE = 'tasks/task4_visual_search/models/embeddings_task4.npy'
+MODEL_FILE = 'models/task_4/embedding_visual_search.keras'
+INDEX_FILE = 'models/task_4/embeddings_task4.npy'
 
-# os.makedirs('tasks/task4_visual_search/models', exist_ok = True)
-os.makedirs('tasks/task4_visual_search/outputs', exist_ok = True)
+# os.makedirs('models/task_4', exist_ok = True)
+os.makedirs('outputs/task_4', exist_ok = True)
 
 # 1. Split data
 train_df, val_df = split_data(df_train)
@@ -303,7 +303,7 @@ for i in range(min(n_queries, len(val_df))):
         })
 
 # 7. Save the top 5 for each validation query so we have an output file
-pd.DataFrame(rows).to_csv('tasks/task4_visual_search/outputs/task4_topk_predictions.csv', index = False)
+pd.DataFrame(rows).to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
 
 print(f"precision@5: {np.mean(scores):.3f}")
 
