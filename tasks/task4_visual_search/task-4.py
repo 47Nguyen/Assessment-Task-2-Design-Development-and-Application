@@ -8,7 +8,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Activation, Flatten, MaxPooling2D, UnitNormalization
 from sklearn.model_selection import train_test_split
-from PIL import Image
+from pathlib import Path
 tf.get_logger().setLevel('ERROR')
 
 # Seed so the triplet sampling gives the same results every run
@@ -21,10 +21,8 @@ tf.random.set_seed(42)
 
 ## Load datas
 train_path = './A2_FashionDataset/FashionDataset/train/styles_train.csv'
-test_path = './A2_FashionDataset/FashionDataset/test/styles_prediction.csv'
 
 df_train = pd.read_csv(train_path)
-df_test = pd.read_csv(test_path)
 
 # Setup image path for products
 df_train['path'] = './A2_FashionDataset/FashionDataset/train/images_train' + '/' + df_train['id'].astype(str) + '.jpg'
@@ -33,16 +31,16 @@ df_train['path'] = './A2_FashionDataset/FashionDataset/train/images_train' + '/'
 # Preprocess dataset
 df_train = df_train.drop(columns=['Unnamed: 10','Unnamed: 11'])
 
-# 5 rows in the csv point at images that are not in the folder, drop them
+# 5 rows in the csv point at images that are not in the folder, drop them``
 df_train = df_train[df_train['path'].apply(os.path.exists)]
 
 # print(df_train)
 # count = df_train['masterCategory'].nunique()
 
 
-# Check image size
-size = Image.open(df_train['path'][2]).size # 60 wide * 80 tall
-target_shape = (80,60)  # tf.image.resize takes (height, width)
+# The images are 60 wide by 80 tall.
+# tf.image.resize takes (height, width) so it has to be this way round.
+target_shape = (80,60)
 
 
 ## Preprcoess iamge
@@ -59,12 +57,14 @@ def preprocess_image(filename):
     image = tf.image.resize(image, target_shape)
     return image
 
-## Print an image
+# Print image - testing
+
 def print_image(index):
     plt.figure(dpi = 28)
     image = preprocess_image(df_train['path'][index])
     plt.imshow(image)
     plt.show()
+
 
 # Take paths from anchors + ref and then load -> image
 def preprocess_triplets(anchor, reference, disimilar):
@@ -77,7 +77,6 @@ def preprocess_triplets(anchor, reference, disimilar):
         preprocess_image(reference),
         preprocess_image(disimilar),
     )
-
 
 ## Define our anchor
 def anchor_references(df):
@@ -103,7 +102,6 @@ def anchor_references(df):
             references.append(reference)
             disimilars.append(disimilar)
     return anchors, references, disimilars
-
 
 ## Embedding network (the "twin" CNN shared by anchor/reference/disimilar)
 def embedding_model():
@@ -161,14 +159,11 @@ def list_to_dataset(df):
     dataset = dataset.shuffle(1024).batch(32).prefetch(tf.data.AUTOTUNE)
     return dataset
 
-
 ## Triplet loss: we want the anchor close to the reference and far from the disimilar
 def triplet_loss(anchor_emb, reference_emb, disimilar_emb, margin = 0.5):
     d_pos = tf.reduce_sum(tf.square(anchor_emb - reference_emb), axis = -1)
     d_neg = tf.reduce_sum(tf.square(anchor_emb - disimilar_emb), axis = -1)
     return tf.reduce_mean(tf.maximum(d_pos - d_neg + margin, 0.0))
-
-
 ## One batch of learning, weights get updated here
 def train_step(model, optimizer, anchor, reference, disimilar):
     with tf.GradientTape() as tape:
@@ -181,7 +176,6 @@ def train_step(model, optimizer, anchor, reference, disimilar):
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
     return loss
 
-
 ## Same maths but no weight update, we are only measuring here
 def val_step(model, anchor, reference, disimilar):
     anchor_emb = model(anchor, training = False)
@@ -189,8 +183,7 @@ def val_step(model, anchor, reference, disimilar):
     disimilar_emb = model(disimilar, training = False)
     return triplet_loss(anchor_emb, reference_emb, disimilar_emb)
 
-
-def train_model(model, train_dataset, val_dataset, epochs = 5, learning_rate = 1e-4):
+def train_model(model, train_dataset, val_dataset, epochs = 4, learning_rate = 1e-4):
     optimizer = tf.keras.optimizers.Adam(learning_rate)
 
     for epoch in range(epochs):
@@ -230,7 +223,6 @@ def search(model, query_path, index, df, k = 5):
 
     return df.iloc[nearest], distances[nearest]
 
-
 ## Show the query next to what we retrieved
 def show_results(query_path, results):
     plt.figure(figsize = (12, 3))
@@ -247,71 +239,73 @@ def show_results(query_path, results):
         plt.title(row['articleType'], fontsize = 8)
         plt.axis('off')
 
-    plt.savefig('outputs/task4_query_grid.png', bbox_inches = 'tight')
+    plt.savefig('tasks/task4_visual_search/outputs/task4_query_grid.png', bbox_inches = 'tight')
     plt.close()
 
+MODEL_FILE = 'tasks/task4_visual_search/models/embedding_visual_search.keras'
+INDEX_FILE = 'tasks/task4_visual_search/models/embeddings_task4.npy'
 
-## Of the k we retrieved, how many share the query's articleType
-def precision_at_k(model, index, catalogue_df, query_df, k = 5, n_queries = 100):
-    scores = []
-
-    for i in range(min(n_queries, len(query_df))):
-        query = query_df.iloc[i]
-        results, _ = search(model, query['path'], index, catalogue_df, k)
-        hits = (results['articleType'] == query['articleType']).sum()
-        scores.append(hits / k)
-
-    return np.mean(scores)
-
-
-
+# os.makedirs('tasks/task4_visual_search/models', exist_ok = True)
+os.makedirs('tasks/task4_visual_search/outputs', exist_ok = True)
 
 # 1. Split data
 train_df, val_df = split_data(df_train)
-train_dataset = list_to_dataset(train_df)
-val_dataset = list_to_dataset(val_df)
 
-# 2. Train the embedding model on the triplets.
+# 2. Load the model if we already trained one, otherwise train it now.
 # 4 epochs because the val loss starts going back up on the 5th.
-model = embedding_model()
-model = train_model(model, train_dataset, val_dataset, epochs = 4)
+if Path(MODEL_FILE).exists() and Path(INDEX_FILE).exists():
+    print('loading saved model')
+    model = tf.keras.models.load_model(MODEL_FILE)
+    index = np.load(INDEX_FILE)
+else:
+    train_dataset = list_to_dataset(train_df)
+    val_dataset = list_to_dataset(val_df)
 
-# 3. Embed the whole training catalogue so we have something to search
-index = build_index(model, train_df)
+    model = embedding_model()
+    model = train_model(model, train_dataset, val_dataset, epochs = 4)
 
-# 4. Save the model and the index so we don't have to train again
-os.makedirs('models', exist_ok = True)
-os.makedirs('outputs', exist_ok = True)
+    # 3. Embed the whole training catalogue so we have something to search
+    index = build_index(model, train_df)
 
-model.save('models/embedding_visual_search.keras')
-np.save('models/embeddings_task4.npy', index)
+    # 4. Save both so the next run can skip straight to searching
+    model.save(MODEL_FILE)
+    np.save(INDEX_FILE, index)
 
 # 5. Query with a validation image, the model has never seen it
 query = val_df.iloc[0]
 results, distances = search(model, query['path'], index, train_df, k = 5)
 
-print(f"query: {query['articleType']}")
-print(results[['id', 'articleType', 'baseColour']])
+print(f"query: {query['articleType']}  {query['path']}")
+print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
 
-# 6. How often do the retrieved items match the query type
-print(f"precision@5: {precision_at_k(model, index, train_df, val_df, k = 5):.3f}")
-
-# 7. Save the top 5 for each validation query so we have an output file
+# 6. Run the validation queries once, then use that same pass for both the
+# output file and the precision score
+n_queries = 100
 rows = []
-for i in range(100):
+scores = []
+
+for i in range(min(n_queries, len(val_df))):
     q = val_df.iloc[i]
     res, dist = search(model, q['path'], index, train_df, k = 5)
+
+    scores.append((res['articleType'] == q['articleType']).sum() / 5)
+
     for rank in range(len(res)):
         rows.append({
             'query_id': q['id'],
             'query_articleType': q['articleType'],
+            'query_path': q['path'],
             'rank': rank + 1,
             'retrieved_id': res.iloc[rank]['id'],
             'retrieved_articleType': res.iloc[rank]['articleType'],
+            'retrieved_path': res.iloc[rank]['path'],
             'distance': dist[rank],
         })
 
-pd.DataFrame(rows).to_csv('outputs/task4_topk_predictions.csv', index = False)
+# 7. Save the top 5 for each validation query so we have an output file
+pd.DataFrame(rows).to_csv('tasks/task4_visual_search/outputs/task4_topk_predictions.csv', index = False)
+
+print(f"precision@5: {np.mean(scores):.3f}")
 
 # 8. Save the query + neighbours picture for the report
 show_results(query['path'], results)

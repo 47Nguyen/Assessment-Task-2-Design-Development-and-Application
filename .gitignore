@@ -3,16 +3,10 @@ A2_FashionDataset/
 
 # Generated artefacts
 cache/
-models/
-outputs/
-
 # Python
 __pycache__/
 *.py[cod]
 *.egg-info/
-.venv/
-venv/
-env/
 
 # Notebooks
 .ipynb_checkpoints/
@@ -25,5 +19,3 @@ desktop.ini
 # Editors
 .vscode/
 .idea/
-PLAN.md
-A2_Task4 (1).docx
