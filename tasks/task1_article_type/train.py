@@ -140,13 +140,10 @@ def get_split_self_contained(target_value="articleType", normalised=True, verbos
 # ---------------------------------------------------------------------------
 def build_cnn(n_classes, dropout=0.4):
     """
-    Transfer Learning model using MobileNetV2 as frozen backbone.
-    Input shape: (96, 96, 3) — upsampled at runtime via a Resizing layer.
-    The base MobileNetV2 weights are frozen; only the classification head is trained.
-    After initial training, call fine_tune_cnn() to unfreeze the top layers.
+    Custom CNN model trained from scratch.
+    Input shape: (80, 60, 3).
     """
     from tensorflow.keras import layers, models
-    from tensorflow.keras.applications import MobileNetV2
     
     # Data Augmentation (applied only during training)
     augmentation = tf.keras.Sequential([
@@ -158,48 +155,29 @@ def build_cnn(n_classes, dropout=0.4):
     
     inputs = layers.Input(shape=(80, 60, 3), name="image")
     
-    # Upsample to MobileNetV2 minimum input (96x96)
-    x = layers.Resizing(96, 96, name="resize")(inputs)
-    
     # Augmentation (active only during model.fit)
-    x = augmentation(x)
+    x = augmentation(inputs)
     
-    # MobileNetV2 backbone (pretrained on ImageNet, frozen)
-    base_model = MobileNetV2(
-        input_shape=(96, 96, 3),
-        include_top=False,
-        weights='imagenet'
-    )
-    base_model.trainable = False  # Freeze backbone initially
+    # Custom CNN backbone
+    x = layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.BatchNormalization()(x)
     
-    x = base_model(x, training=False)
+    x = layers.Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.BatchNormalization()(x)
+    
+    x = layers.Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+    x = layers.MaxPooling2D((2, 2))(x)
+    x = layers.BatchNormalization()(x)
+    
     x = layers.GlobalAveragePooling2D(name="gap")(x)
     x = layers.Dense(256, activation='relu', name="embedding")(x)
     x = layers.BatchNormalization(name="head_bn")(x)
     x = layers.Dropout(dropout, name="dropout")(x)
     outputs = layers.Dense(n_classes, activation='softmax', name="prediction")(x)
     
-    return models.Model(inputs=inputs, outputs=outputs, name="cnn_articleType")
-
-
-def fine_tune_cnn(model, unfreeze_from_layer=-30, learning_rate=5e-5):
-    """
-    Unfreeze the top layers of MobileNetV2 for fine-tuning.
-    Call this after initial head training converges.
-    """
-    base_model = model.get_layer("mobilenetv2_1.00_96")
-    base_model.trainable = True
-    
-    # Freeze everything except the last N layers
-    for layer in base_model.layers[:unfreeze_from_layer]:
-        layer.trainable = False
-    
-    model.compile(
-        optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learning_rate),
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy']
-    )
-    return model
+    return models.Model(inputs=inputs, outputs=outputs, name="custom_cnn_articleType")
 
 def get_default_callbacks(target_value, patience=6):
     """
@@ -372,49 +350,33 @@ def main():
         evaluate_model(y_val, y_pred_svm, target_value, "linear_svm", 
                        notes="SGDClassifier with hinge loss on HOG+ColorHist")
 
-    # Step 3: CNN with Transfer Learning (MobileNetV2)
-    print("\n--- Step 3: Training CNN with Transfer Learning (MobileNetV2) ---")
+    # Step 3: CNN from scratch
+    print("\n--- Step 3: Training Custom CNN from scratch ---")
     
     model = build_cnn(n_classes=n_classes)
     
     # Compute capped class weights
     weights_dict = compute_capped_class_weights(y_train, max_weight_cap=8.0)
     
-    # Phase 1: Train classification head only (frozen backbone)
-    print("Phase 1: Training classification head (backbone frozen)...")
+    print("Training Custom CNN...")
     model.compile(
         optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=1e-3),
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy']
     )
     
-    phase1_epochs = min(args.epochs, 15)
     history = model.fit(
         X_train, y_train,
         validation_data=(X_val, y_val),
-        epochs=phase1_epochs,
+        epochs=args.epochs,
         batch_size=args.batch_size,
         class_weight=weights_dict,
-        callbacks=get_default_callbacks(target_value, patience=5)
+        callbacks=get_default_callbacks(target_value, patience=6)
     )
     
-    # Phase 2: Fine-tune top layers of MobileNetV2
-    remaining_epochs = args.epochs - phase1_epochs
-    if remaining_epochs > 0:
-        print("\nPhase 2: Fine-tuning top MobileNetV2 layers...")
-        model = fine_tune_cnn(model, unfreeze_from_layer=-30, learning_rate=3e-5)
-        model.fit(
-            X_train, y_train,
-            validation_data=(X_val, y_val),
-            epochs=remaining_epochs,
-            batch_size=args.batch_size,
-            class_weight=weights_dict,
-            callbacks=get_default_callbacks(target_value, patience=6)
-        )
-    
     y_pred_cnn = model.predict(X_val).argmax(axis=1)
-    evaluate_model(y_val, y_pred_cnn, target_value, "cnn_baseline",
-                   notes="MobileNetV2 Transfer Learning + fine-tune")
+    evaluate_model(y_val, y_pred_cnn, target_value, "cnn_custom",
+                   notes="Custom CNN trained from scratch")
     
     model.save("models/cnn_articleType.keras")
     print("CNN model successfully saved to: models/cnn_articleType.keras")
