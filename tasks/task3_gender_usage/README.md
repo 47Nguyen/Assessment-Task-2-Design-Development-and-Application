@@ -1,121 +1,232 @@
-# Task 3: Fashion Gender and Usage (MLP)
+# Task 3 — Gender & Usage Classification (`gender`, `usage`)
 
-Task 3 predicts **both** catalogue `gender` (5 classes) and `usage` (8 classes)
-from a product image. Two independently trained MLPs keep these targets separate.
-These labels describe product marketing, not a person's gender identity.
+**Report section 3.3**
 
-## Start in VSCode
+> Predict two catalogue labels from one fashion image: who the item is for
+> (`gender`) and when it is suitable (`usage`).
 
-1. Open the repository folder and select its Python 3.11 `.venv` interpreter.
-2. Install the existing root requirements if needed: `python -m pip install -r requirements.txt`.
-3. Open `tasks/task3_gender_usage/task3.ipynb`, select the same kernel and Run All.
-4. The notebook uses `MODE = "train"` by default. Use `"review"` with an existing
-   `RUN_DIR` to inspect a completed run without training again, or `"smoke"` for a small check.
+Task 3 trains two separate Multi-Layer Perceptron (MLP) classifiers. Keeping the
+targets separate avoids creating many rare `gender × usage` combinations and
+allows each target to keep its own class vocabulary.
 
-Dataset layout from the repository root:
+## Start here
+
+Open a PowerShell terminal at the repository root and activate Python 3.11:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+The three Task 3 scripts are already prepared. Do **not** copy `_template.py`
+over them. Always use `python -m` from the repository root.
+
+| File | Purpose |
+|---|---|
+| `data.py` | Audit data, standardise images and create the split |
+| `train.py` | Train, compare, select and evaluate MLP candidates |
+| `predict.py` | Reload final models, predict one image or export a CSV |
+
+Required dataset layout:
 
 ```text
 A2_FashionDataset/FashionDataset/
-  train/styles_train.csv
-  train/images_train/<id>.jpg
-  test/styles_prediction.csv
-  test/images_test/<id>.jpg
+├── train/
+│   ├── styles_train.csv
+│   └── images_train/<id>.jpg
+└── test/
+    ├── styles_prediction.csv
+    └── images_test/<id>.jpg
 ```
 
-No GPU, downloads or pretrained model weights are required. CPU time depends on
-the machine. The full experiment trains six candidate MLPs plus one optional
-merged-label experiment, up to 20 epochs each with early stopping. Raw images
-are held as compact uint8 arrays; the model normalizes pixels internally.
+## What the data looks like
 
-## Command-Line Alternatives
+After matching metadata to readable image files, Task 3 has **38,612 usable
+training images**.
 
-Run from the repository root:
+### `gender`
+
+| Class | Images | Share |
+|---|---:|---:|
+| Men | 20,913 | 54.2% |
+| Women | 14,160 | 36.7% |
+| Unisex | 2,080 | 5.4% |
+| Boys | 814 | 2.1% |
+| Girls | 645 | 1.7% |
+
+- 5 classes and no missing labels
+- Majority baseline: approximately **54.0% holdout accuracy**
+
+### `usage`
+
+| Class | Images | Share |
+|---|---:|---:|
+| Casual | 29,636 | 76.8% |
+| Sports | 3,940 | 10.2% |
+| Ethnic | 2,570 | 6.7% |
+| Formal | 2,300 | 6.0% |
+| Smart Casual | 55 | 0.1% |
+| Travel | 25 | 0.1% |
+| Party | 13 | <0.1% |
+| Home | 1 | <0.1% |
+
+- 8 classes and 72 rows with a missing usage label
+- Majority baseline: approximately **76.9% holdout accuracy**
+- `Home` has no validation or holdout example, so both complete-vocabulary and
+  supported-class macro-F1 are recorded
+
+## The thing to understand before you start
+
+Accuracy alone is misleading for `usage`: a model that always predicts
+`Casual` already reaches about 77% accuracy. The main selection metric is
+therefore **validation macro-F1**, which gives each class equal importance.
+
+The code found **636 exact-duplicate groups**. Every duplicate group stays in a
+single partition to prevent the same decoded image appearing in both training
+and evaluation. The resulting shared split is:
+
+| Split | Images | Purpose |
+|---|---:|---|
+| Train | 27,029 | Learn model parameters |
+| Validation | 5,777 | Compare candidates and select the winner |
+| Holdout | 5,806 | Evaluate the frozen winner once |
+
+Task 3 does not use Task 2's split, so their raw scores are not a controlled
+same-split model comparison.
+
+## Steps
+
+### 1. Audit the data (optional)
 
 ```powershell
-python -m tasks.task3_gender_usage.train --smoke
-python -m tasks.task3_gender_usage.train --run-dir outputs/task3/my_full_run
-python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/my_full_run/models --output outputs/task3/my_full_run/styles_prediction_task3.csv
+python -m tasks.task3_gender_usage.data --output-dir outputs/task3/data_check_3
 ```
 
-A run never overwrites another run. Choose a new run name when retraining.
-`--smoke` uses a small stratified subset and two epochs; its scores are **not report results**.
-The notebook's upload widget demonstrates both predictions using the same
-`Task3Predictor` API as the command-line script. Scores are not calibrated confidence.
+This creates audit reports and `split_manifest.csv`; it does not train a model.
+The folder must be new. If it already exists, choose another name.
 
-## What The Experiment Does
+### 2. Check the complete training pipeline quickly
 
-- Audits all train/test images: missing files, unreadable images, grayscale,
-  unusual dimensions, missing labels, exact decoded-RGB duplicates and conflicting labels.
-- Converts to RGB and resizes to 32 high x 24 wide, preserving the usual 4:3 aspect ratio.
-- Uses one deterministic, approximately 70/15/15 train/validation/holdout split
-  for both targets. Exact duplicate groups stay together. Joint gender/usage
-  strata with fewer than three groups, and target-conflicting groups, stay in train.
-  Reports the resulting coverage; `Home` cannot have a meaningful holdout score.
-- Compares a majority predictor, a sigmoid MLP, a deeper ReLU/dropout MLP and
-  the same deeper MLP with capped square-root inverse-frequency training weights.
-- Selects epochs and the final MLP using **validation** macro-F1 only; evaluates
-  only the selected original-label MLP on holdout. Holdout never drives tuning.
-- Reports accuracy, fixed-vocabulary macro-F1, supported-class macro-F1, weighted F1,
-  per-class support, confusion matrices, errors, training curves and batch latency.
-- Tests merging rare usage labels separately: compare retrained five-class
-  predictions with the eight-class model's probabilities folded to the **same**
-  five labels, on the **same** images. Final submissions retain all eight labels.
-- Saves models and class mappings, checks save/reload equivalence, and creates
-  a new CSV preserving official ID order and all non-Task-3 columns.
+```powershell
+python -m tasks.task3_gender_usage.train --smoke --run-dir outputs/task3/smoke_check_3
+```
 
-The sigmoid-to-deeper comparison changes several architectural settings together;
-it is an approach comparison, not proof of which single setting caused a difference.
-The weighted-versus-unweighted deeper models isolate class weighting.
+Smoke mode uses a small subset and two epochs. It verifies execution only; do
+not use smoke-test scores in the report. The initial audit still scans and
+hashes every train/test image to detect duplicate leakage, so there may be a
+short period with no new terminal output before the two-epoch training begins.
 
-## Files And Outputs
+### 3. Train a new full run only when needed
 
-`data.py` handles auditing, splitting and image preprocessing. `train.py` handles
-experiments and evaluation. `predict.py` exposes reloadable inference and notebook upload.
-The notebook presents the analysis and calls those same functions, without duplicated training code.
+```powershell
+python -m tasks.task3_gender_usage.train --run-dir outputs/task3/final_run_2
+```
 
-Each run is isolated under `outputs/task3/<run>/` (already gitignored):
+Each run directory must be new because the program intentionally refuses to
+overwrite models or evidence. A verified full run already exists at
+`outputs/task3/final_run`, so retraining is not required just to predict.
 
-| Output | Purpose |
-| --- | --- |
-| `audit.json`, `audit_images_*.csv` | Actual dataset checks |
-| `split_manifest.csv`, `class_coverage.csv` | Reproduce the split and inspect rare labels |
-| `results_task3.csv`, `selected_models.json` | Comparisons and evidence-based selection |
-| `*_report.csv`, `*_confusion.png`, `*_errors.png`, `*_learning.png` | Report evidence |
-| `models/gender_final.keras`, `models/usage_final.keras` | Reloadable selected models |
-| `models/*_final.json`, `config.json`, `provenance.json` | Classes, preprocessing and reproducibility |
-| `styles_prediction_task3.csv` | Task 3 contribution, **not** a complete team submission |
+For each target, training compares:
 
-Model files are gitignored, but must be included in the final assignment ZIP.
-Do not upload data, models, predictions or code until the owner reviews them.
+1. Majority-class baseline.
+2. `mlp_default`: one 256-unit sigmoid hidden layer.
+3. `mlp_regularized`: 256/128 ReLU layers with dropout.
+4. `mlp_weighted`: the regularized network with softened class weights.
 
-## Integration And Limitations
+The highest validation macro-F1 wins. Ties prefer fewer parameters and then a
+stable model name. Holdout scores are never used for model selection.
 
-The root README currently references a deleted `src` package. This Task 3 pipeline
-does not restore it or change Tasks 1/2/4. Its split is explicit and saved; it is
-**not** the old shared split. Teammates must align row IDs before claiming controlled
-comparisons across tasks. Using the same seed alone does not produce the same split.
+### 4. Predict one image with the verified models
 
-Flattening preserves pixel positions; it does not erase image information. MLPs
-can learn spatial patterns, but lack CNN locality/weight-sharing and are sensitive
-to alignment. Low image resolution and marketing labels limit generalization.
-Exact hashing does not catch near duplicates. Tiny validation classes have noisy
-scores; absent classes are explicitly counted as zero in fixed-vocabulary macro-F1,
-not claimed to have been independently tested.
+```powershell
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --image A2_FashionDataset/FashionDataset/test/images_test/52003.jpg
+```
 
-An untouched holdout is an **internal** generalization check. It is not external
-real-world validation. The notebook discusses related published work, but it uses
-different datasets/labels and cannot justify a direct numerical benchmark claim.
-Team members still need independently labelled external product images for a
-credible deployment claim; do not guess labels from appearance or call the blind
-assignment test set a labelled evaluation set.
+The command prints one `gender` and one `usage` label plus softmax scores.
+Softmax scores are not calibrated guarantees of correctness.
 
-## Sources
+### 5. Export predictions for all 5,829 test images
 
-- [TensorFlow EarlyStopping](https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/EarlyStopping)
-- [scikit-learn F1 definitions](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html)
-- [Liu et al., DeepFashion (CVPR 2016)](https://openaccess.thecvf.com/content_cvpr_2016/html/Liu_DeepFashion_Powering_Robust_CVPR_2016_paper.html)
-- [Zakizadeh et al., Improving the Annotation of DeepFashion Images (2018)](https://arxiv.org/abs/1807.11674)
+```powershell
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --output outputs/task3/final_run/styles_prediction_task3_check_2.csv
+```
 
-Review and understand the code and verify the course's AI-use/disclosure rules
-before submitting. This Task 3 implementation does not complete the team's
-five-page report, Tasks 1/2/4, or a combined application automatically.
+To preserve predictions already filled by teammates, pass their official-layout
+CSV as a template and write to a different file:
+
+```powershell
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --template outputs/team_predictions_before_task3.csv --output outputs/team_predictions_with_task3.csv
+```
+
+`predict.py` changes only `gender` and `usage`. It verifies official column and
+ID order and refuses to overwrite the source or an existing destination.
+
+## Verified results
+
+| Target | Selected model | Holdout accuracy | Holdout macro-F1 |
+|---|---|---:|---:|
+| Gender | `mlp_default` | 0.8250 | 0.6186 |
+| Usage (official 8 classes) | `mlp_default` | 0.8293 | 0.3141 |
+
+The optional five-class usage experiment merges the four extremely small
+labels into `Other`. Its retrained model reaches holdout macro-F1 **0.5165**,
+compared with **0.5026** when the official eight-class probabilities are folded.
+This is analysis evidence only; submission predictions still use all 8 labels.
+
+## Main outputs
+
+```text
+outputs/task3/final_run/
+├── models/
+│   ├── gender_final.keras
+│   ├── gender_final.json
+│   ├── usage_final.keras
+│   └── usage_final.json
+├── audit.json
+├── class_coverage.csv
+├── results_task3.csv
+├── selected_models.json
+├── split_manifest.csv
+├── gender_final_holdout_report.csv
+├── gender_final_holdout_confusion.png
+├── usage_final_holdout_report.csv
+├── usage_final_holdout_confusion.png
+└── styles_prediction_task3.csv
+```
+
+Keep each `.keras` model with its matching `.json`; the JSON stores the image
+size and exact class order required by `predict.py`.
+
+## Watch out for
+
+- Do not type backslashes before underscores. Use `task3_gender_usage`, not
+  `task3\_gender\_usage`.
+- Do not run `python tasks/task3_gender_usage/train.py`; use the `python -m`
+  command from the repository root.
+- Do not run `python -m venv .venv` while `.venv` is active. If packages say
+  `Requirement already satisfied`, the environment is already installed.
+- `FileExistsError` for a run or CSV means the safety check worked. Choose a
+  new output name instead of deleting a verified result.
+- Do not report accuracy alone. Include macro-F1, per-class results, confusion
+  matrices and the class imbalance limitation.
+- `outputs/` is ignored by Git. Include required models/results separately in
+  the final submission ZIP; do not assume `git push` uploads them.
+
+## Checklist
+
+- [x] Data quality audit and duplicate-aware split saved
+- [x] Majority baselines recorded for both targets
+- [x] Three MLP candidates compared for both targets
+- [x] Validation macro-F1 used for selection
+- [x] Accuracy, macro-F1 and per-class reports saved
+- [x] Confusion matrices and error examples saved
+- [x] Five-class usage improvement investigated
+- [x] Final models reloaded and tested on RGB, grayscale and RGBA images
+- [x] Test CSV exported with 5,829 IDs in official order
+- [ ] Team reviews the local changes before commit
+- [ ] Task 1 and Task 2 predictions are merged into the final team CSV
+- [ ] Code, final models, evidence and README are included in the submission ZIP
+
+No notebook is required for this script-based workflow. `task3.ipynb` may be
+kept as optional demonstration material, but `data.py`, `train.py`,
+`predict.py`, the final models, evidence and this README are the core files.
