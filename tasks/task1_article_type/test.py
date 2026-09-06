@@ -7,15 +7,15 @@ INSTRUCTIONS / HOW TO TEST:
 Run all commands from the project root directory with your virtual environment activated:
 
 1. Test a single image:
-   python -m tasks.task1_article_type.test_model --image path/to/sample.jpg
-   python -m tasks.task1_article_type.test_model --image A2_FashionDataset/FashionDataset/train/images_train/1163.jpg
+   python -m tasks.task1_article_type.test --image path/to/sample.jpg
+   python -m tasks.task1_article_type.test --image A2_FashionDataset/FashionDataset/train/images_train/1163.jpg
 
 2. Test on N random validation samples and export visual debug plots:
-   python -m tasks.task1_article_type.test_model --random 10
+   python -m tasks.task1_article_type.test --random 10
    (Outputs saved to: outputs/test_debug/)
 
 3. Generate predictions for the test set and export CSV:
-   python -m tasks.task1_article_type.test_model --generate-predictions
+   python -m tasks.task1_article_type.test --generate-predictions
    (Output saved to: outputs/task1_test_predictions.csv)
 
 Note: Ensure models/cnn_articleType.keras and models/label_encoder_articleType.joblib 
