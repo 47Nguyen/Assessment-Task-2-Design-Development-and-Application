@@ -5,16 +5,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-from pathlib import Path
-from keras import applications
-from keras import layers
-from keras import losses
-from keras import metrics
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Activation, Flatten, MaxPooling2D
+from tensorflow.keras.layers import Conv2D, Dense, Activation, Flatten, MaxPooling2D, UnitNormalization
 from sklearn.model_selection import train_test_split
 from PIL import Image
 tf.get_logger().setLevel('ERROR')
+
+# Seed so the triplet sampling gives the same results every run
+np.random.seed(42)
+tf.random.set_seed(42)
 
 # https://keras.io/examples/vision/siamese_network/
 # https://www.datacamp.com/tutorial/cnn-tensorflow-python
@@ -42,8 +41,8 @@ df_train = df_train[df_train['path'].apply(os.path.exists)]
 
 
 # Check image size
-size = Image.open(df_train['path'][2]).size # 60 * 80 
-target_shape = (60,80)
+size = Image.open(df_train['path'][2]).size # 60 wide * 80 tall
+target_shape = (80,60)  # tf.image.resize takes (height, width)
 
 
 ## Preprcoess iamge
@@ -108,12 +107,13 @@ def anchor_references(df):
 
 ## Embedding network (the "twin" CNN shared by anchor/reference/disimilar)
 def embedding_model():
-    INPUT_SHAPE = (60,80,3) 
+    INPUT_SHAPE = (80,60,3)
 
     model = Sequential()
-    
+
     model.add(Conv2D(64, (3,3), input_shape = INPUT_SHAPE))
-    model.add(MaxPooling2D(pool_size = (2,2))) 
+    model.add(Activation("relu"))
+    model.add(MaxPooling2D(pool_size = (2,2)))
     
     model.add(Conv2D(64, (3,3)))
     model.add(Activation("relu"))
@@ -128,6 +128,10 @@ def embedding_model():
     model.add(Activation("relu"))
 
     model.add(Dense(64))  # embedding vector, no activation
+
+    # Put the embedding on the unit sphere, otherwise the model can beat the
+    # 0.5 margin by making the vectors bigger instead of separating the classes
+    model.add(UnitNormalization())
 
     return model
 
@@ -243,7 +247,8 @@ def show_results(query_path, results):
         plt.title(row['articleType'], fontsize = 8)
         plt.axis('off')
 
-    plt.show()
+    plt.savefig('outputs/task4_query_grid.png', bbox_inches = 'tight')
+    plt.close()
 
 
 ## Of the k we retrieved, how many share the query's articleType
@@ -266,22 +271,50 @@ train_df, val_df = split_data(df_train)
 train_dataset = list_to_dataset(train_df)
 val_dataset = list_to_dataset(val_df)
 
-# 2. Train the embedding model on the triplets
+# 2. Train the embedding model on the triplets.
+# 4 epochs because the val loss starts going back up on the 5th.
 model = embedding_model()
-model = train_model(model, train_dataset, val_dataset, epochs = 5)
+model = train_model(model, train_dataset, val_dataset, epochs = 4)
 
 # 3. Embed the whole training catalogue so we have something to search
 index = build_index(model, train_df)
 
-# 4. Query with a validation image, the model has never seen it
+# 4. Save the model and the index so we don't have to train again
+os.makedirs('models', exist_ok = True)
+os.makedirs('outputs', exist_ok = True)
+
+model.save('models/embedding_visual_search.keras')
+np.save('models/embeddings_task4.npy', index)
+
+# 5. Query with a validation image, the model has never seen it
 query = val_df.iloc[0]
 results, distances = search(model, query['path'], index, train_df, k = 5)
 
 print(f"query: {query['articleType']}")
 print(results[['id', 'articleType', 'baseColour']])
 
-# 5. How often do the retrieved items match the query type
+# 6. How often do the retrieved items match the query type
 print(f"precision@5: {precision_at_k(model, index, train_df, val_df, k = 5):.3f}")
+
+# 7. Save the top 5 for each validation query so we have an output file
+rows = []
+for i in range(100):
+    q = val_df.iloc[i]
+    res, dist = search(model, q['path'], index, train_df, k = 5)
+    for rank in range(len(res)):
+        rows.append({
+            'query_id': q['id'],
+            'query_articleType': q['articleType'],
+            'rank': rank + 1,
+            'retrieved_id': res.iloc[rank]['id'],
+            'retrieved_articleType': res.iloc[rank]['articleType'],
+            'distance': dist[rank],
+        })
+
+pd.DataFrame(rows).to_csv('outputs/task4_topk_predictions.csv', index = False)
+
+# 8. Save the query + neighbours picture for the report
+show_results(query['path'], results)
 
 
 
