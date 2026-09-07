@@ -328,6 +328,8 @@ def mode_generate_predictions():
             
     # Export CSV
     df = pd.DataFrame({"id": ids, "predicted_articleType": predictions})
+    df["id"] = df["id"].astype(int)
+    df = df.sort_values("id").reset_index(drop=True)
     out_path = OUTPUT_DIR / "task1_test_predictions.csv"
     df.to_csv(out_path, index=False)
     

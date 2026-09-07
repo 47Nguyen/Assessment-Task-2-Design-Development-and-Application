@@ -48,13 +48,9 @@ folder_path = ""
 target_value = "articleType"     # <-- CHANGE THIS
 
 # ---------------------------------------------------------------------------
-# 2. Self-contained replacement for src.data.get_split
+# 2. Split
 # ---------------------------------------------------------------------------
-def get_split_self_contained(target_value="articleType", normalised=True, verbose=True):
-    """
-    100% self-contained data loader and split generator.
-    Replaces get_split from src.data when the src folder is deleted.
-    """
+def get_split(target_value="articleType", normalised=True, verbose=True):
     cache_prefix = CACHE_DIR / f"task1_{target_value}"
     X_train_path = f"{cache_prefix}_X_train.npy"
     X_val_path = f"{cache_prefix}_X_val.npy"
@@ -136,11 +132,11 @@ def get_split_self_contained(target_value="articleType", normalised=True, verbos
     return X_train, X_val, y_train, y_val, le
 
 # ---------------------------------------------------------------------------
-# 3. Self-contained replacements for models & callbacks
+# 3. Build CNN
 # ---------------------------------------------------------------------------
 def build_cnn(n_classes, dropout=0.4):
     """
-    Custom CNN model trained from scratch.
+    Custom CNN model trained .
     Input shape: (80, 60, 3).
     """
     from tensorflow.keras import layers, models
@@ -180,10 +176,6 @@ def build_cnn(n_classes, dropout=0.4):
     return models.Model(inputs=inputs, outputs=outputs, name="custom_cnn_articleType")
 
 def get_default_callbacks(target_value, patience=6):
-    """
-    Self-contained Callbacks Generator.
-    Replaces default_callbacks() from src.models.
-    """
     checkpoint_path = f"models/cnn_{target_value}.keras"
     callbacks = [
         tf.keras.callbacks.EarlyStopping(
@@ -209,13 +201,9 @@ def get_default_callbacks(target_value, patience=6):
     return callbacks
 
 # ---------------------------------------------------------------------------
-# 4. Self-contained replacement for src.evaluate.evaluate_model & confusion
+# 4. Evaluate
 # ---------------------------------------------------------------------------
 def evaluate_model(y_true, y_pred, task_name, model_name, notes=""):
-    """
-    Self-contained evaluation and metrics logger.
-    Replaces evaluate_model() from src.evaluate.
-    """
     acc = accuracy_score(y_true, y_pred)
     balanced_acc = balanced_accuracy_score(y_true, y_pred)
     macro_f1 = f1_score(y_true, y_pred, average='macro')
@@ -297,7 +285,7 @@ def extract_features(images):
 # 6. Main Execution Flow
 # ---------------------------------------------------------------------------
 def main():
-    parser = argparse.ArgumentParser(description="Task 1 train script - Adjusted (Self-Contained)")
+    parser = argparse.ArgumentParser
     parser.add_argument('--epochs', type=int, default=30, help='Number of epochs')
     parser.add_argument('--batch-size', type=int, default=128, help='Batch size')
     parser.add_argument('--tune', action='store_true', help='Run hyperparameter tuning grid')
@@ -306,7 +294,7 @@ def main():
 
     # Load data locally
     print("Loading data split...")
-    X_train, X_val, y_train, y_val, label_encoder = get_split_self_contained(target_value)
+    X_train, X_val, y_train, y_val, label_encoder = get_split(target_value)
     n_classes = len(label_encoder.classes_)
     
     print(f"\nTarget: {target_value}")
@@ -350,8 +338,8 @@ def main():
         evaluate_model(y_val, y_pred_svm, target_value, "linear_svm", 
                        notes="SGDClassifier with hinge loss on HOG+ColorHist")
 
-    # Step 3: CNN from scratch
-    print("\n--- Step 3: Training Custom CNN from scratch ---")
+    # Step 3: CNN 
+    print("\n--- Step 3: Training Custom CNN  ---")
     
     model = build_cnn(n_classes=n_classes)
     
@@ -376,7 +364,7 @@ def main():
     
     y_pred_cnn = model.predict(X_val).argmax(axis=1)
     evaluate_model(y_val, y_pred_cnn, target_value, "cnn_custom",
-                   notes="Custom CNN trained from scratch")
+                   notes="Custom CNN trained ")
     
     model.save("models/cnn_articleType.keras")
     print("CNN model successfully saved to: models/cnn_articleType.keras")
