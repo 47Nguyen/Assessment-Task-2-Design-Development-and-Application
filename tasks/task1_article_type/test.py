@@ -9,6 +9,7 @@ Run all commands from the project root directory with your virtual environment a
 1. Test a single image:
    python -m tasks.task1_article_type.test --image path/to/sample.jpg
    python -m tasks.task1_article_type.test --image A2_FashionDataset/FashionDataset/train/images_train/1163.jpg
+   python -m tasks.task1_article_type.test --image A2_FashionDataset/FashionDataset/test/images_test/52003.jpg
 
 2. Test on N random validation samples and export visual debug plots:
    python -m tasks.task1_article_type.test --random 10
