@@ -19,8 +19,11 @@ tf.random.set_seed(42)
 # https://keras.io/examples/vision/siamese_network/
 # https://www.datacamp.com/tutorial/cnn-tensorflow-python
 # https://pyimagesearch.com/2023/02/13/building-a-dataset-for-triplet-loss-with-keras-and-tensorflow/
+# https://arxiv.org/abs/1503.03832  FaceNet, where semi-hard mining comes from
 
-## Load datas
+
+
+# SECTION 1: LOAD DATA
 train_path = './A2_FashionDataset/FashionDataset/train/styles_train.csv'
 
 df_train = pd.read_csv(train_path)
@@ -31,16 +34,17 @@ df_train['path'] = './A2_FashionDataset/FashionDataset/train/images_train' + '/'
 # Preprocess dataset
 df_train = df_train.drop(columns=['Unnamed: 10','Unnamed: 11'], errors='ignore')
 
-# 5 rows in the csv point at images that are not in the folder, drop them``
+# 5 rows in the csv point at images that are not in the folder, drop them
 df_train = df_train[df_train['path'].apply(os.path.exists)]
-
 
 # The images are 60 wide by 80 tall.
 # tf.image.resize takes (height, width) so it has to be this way round.
 target_shape = (80,60)
 
 
-## Preprcoess iamge
+
+# SECTION 2: IMAGE LOADING / PREPROCESSING
+
 def preprocess_image(filename):
     """
     Load the specified file as a JPEG image, preprocess it and
@@ -48,22 +52,23 @@ def preprocess_image(filename):
     """
     image_string = tf.io.read_file(filename)
     image = tf.image.decode_jpeg(image_string, channels=3)
-    
+
     # convert the image data type from uint8 to float32 and then resize
     image = tf.image.convert_image_dtype(image, dtype = tf.float32)
     image = tf.image.resize(image, target_shape)
     return image
 
-# Print image - testing
 
 def print_image(index):
+    """
+    Quick sanity check - show one preprocessed image from df_train.
+    """
     plt.figure(dpi = 28)
     image = preprocess_image(df_train['path'][index])
     plt.imshow(image)
     plt.show()
 
 
-# Take paths from anchors + ref and then load -> image
 def preprocess_triplets(anchor, reference, disimilar):
     """
     Given the filenames corresponding to the three images, load and
@@ -75,7 +80,23 @@ def preprocess_triplets(anchor, reference, disimilar):
         preprocess_image(disimilar),
     )
 
-## Embedding network (the "twin" CNN shared by anchor/reference/disimilar)
+
+def split_data(df):
+    """
+    We have to build our own split function.
+    Reason is because this task focuses on finding top K of results.
+    It not looking to predicts the a target vaulue.
+    """
+    counts = df['articleType'].value_counts() # Total up the number of each the article type.
+    keep = counts[counts >= 2].index  # Look for any articleType with total counts >=2
+    df = df[df['articleType'].isin(keep)]  # Filter out the dataframe, we only keep values where the articleType counts >= 2
+
+    train_df, val_df = train_test_split(df, test_size=0.2, stratify=df['articleType'], random_state=42)
+
+    return train_df, val_df
+
+
+# SECTION 3: MODEL - the twin CNN shared by anchor/reference/disimilar
 def embedding_model(embed_dim = 64, dense_units = 64, filters = (64, 64, 64),
                     dropout = 0.0, normalise = True):
     """
@@ -117,28 +138,22 @@ def embedding_model(embed_dim = 64, dense_units = 64, filters = (64, 64, 64),
 
     return model
 
-def split_data(df):
-    """ 
-    We have to build our own split function. 
-    Reason is because this task focuses on finding top K of results.
-    It not looking to predicts the a target vaulue.
-    """
-    counts = df['articleType'].value_counts() # Total up the number of each the article type.
-    keep = counts[counts >= 2].index  # Look for any articleType with total counts >=2 
-    df = df[df['articleType'].isin(keep)]  # Filter out the dataframe, we only keep values where the articleType counts >= 2
 
-    train_df, val_df = train_test_split(df,test_size=0.2,stratify=df['articleType'], random_state=42)
-    
-    return train_df, val_df
 
-## Triplet loss: we want the anchor close to the reference and far from the disimilar
+# SECTION 4: TRIPLET LOSS AND ONE STEP OF LEARNING
 def triplet_loss(anchor_emb, reference_emb, disimilar_emb, margin = 0.5):
+    """
+    We want the anchor close to the reference and far from the disimilar.
+    """
     d_pos = tf.reduce_sum(tf.square(anchor_emb - reference_emb), axis = -1)
     d_neg = tf.reduce_sum(tf.square(anchor_emb - disimilar_emb), axis = -1)
     return tf.reduce_mean(tf.maximum(d_pos - d_neg + margin, 0.0))
 
-## One batch of learning, weights get updated here
+
 def train_step(model, optimizer, anchor, reference, disimilar, margin = 0.5):
+    """
+    One batch of learning, weights get updated here.
+    """
     with tf.GradientTape() as tape:
         anchor_emb = model(anchor, training = True)
         reference_emb = model(reference, training = True)
@@ -149,190 +164,21 @@ def train_step(model, optimizer, anchor, reference, disimilar, margin = 0.5):
     optimizer.apply_gradients(zip(gradients, model.trainable_weights))
     return loss
 
-## Same maths but no weight update, we are only measuring here
+
 def val_step(model, anchor, reference, disimilar, margin = 0.5):
+    """
+    Same maths but no weight update, we are only measuring here.
+    """
     anchor_emb = model(anchor, training = False)
     reference_emb = model(reference, training = False)
     disimilar_emb = model(disimilar, training = False)
     return triplet_loss(anchor_emb, reference_emb, disimilar_emb, margin)
 
-## Embed the query then return the k closest images from the index
-def search(model, query_path, index, df, k = 5):
-    query_image = preprocess_image(query_path)
-    query_emb = model(tf.expand_dims(query_image, axis = 0), training = False).numpy()
-
-    distances = np.sum(np.square(index - query_emb), axis = 1)
-    nearest = np.argsort(distances)[:k]
-
-    return df.iloc[nearest], distances[nearest]
-
-## Every query image with its top k, saved as one row of pictures
-def topk_predictions(model, index, index_df, query_df, n_queries = 100, k = 5):
-    """
-    Top k neighbours for the first n_queries validation images.
-
-    Returns the long form table we save as the task 4 output, plus precision@5
-    over the same pass so the number and the file always agree.
-    """
-    rows = []
-    scores = []
-
-    for i in range(min(n_queries, len(query_df))):
-        q = query_df.iloc[i]
-        res, dist = search(model, q['path'], index, index_df, k = k)
-
-        scores.append((res['articleType'] == q['articleType']).sum() / k)
-
-        for rank in range(len(res)):
-            rows.append({
-                'query_id': q['id'],
-                'query_articleType': q['articleType'],
-                'query_path': q['path'],
-                'rank': rank + 1,
-                'retrieved_id': res.iloc[rank]['id'],
-                'retrieved_articleType': res.iloc[rank]['articleType'],
-                'retrieved_path': res.iloc[rank]['path'],
-                'distance': dist[rank],
-            })
-
-    return pd.DataFrame(rows), float(np.mean(scores))
 
 
-## Show the query next to what we retrieved
-def show_results(query_path, results, save_to = 'outputs/task_4/task4_query_grid.png'):
-    plt.figure(figsize = (12, 3))
-
-    plt.subplot(1, len(results) + 1, 1)
-    plt.imshow(preprocess_image(query_path))
-    plt.title("query")
-    plt.axis('off')
-
-    for i in range(len(results)):
-        row = results.iloc[i]
-        plt.subplot(1, len(results) + 1, i + 2)
-        plt.imshow(preprocess_image(row['path']))
-        plt.title(row['articleType'], fontsize = 8)
-        plt.axis('off')
-
-    plt.savefig(save_to, bbox_inches = 'tight')
-    plt.close()
-
-## Every image through the model once. Row i of the result is the embedding of
-## paths[i], which is what lets us map a neighbour back to its dataframe row.
-def embed_paths(model, paths, batch_size = 32):
-    """
-    Embed a list of image paths in order.
-    """
-    dataset = tf.data.Dataset.from_tensor_slices(list(paths))
-    dataset = dataset.map(preprocess_image, num_parallel_calls = tf.data.AUTOTUNE)
-    dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
-    return model.predict(dataset, verbose = 0)
+# SECTION 5: TRIPLET SAMPLING - how anchor/positive/negative get chosen
 
 
-## Distances from every query to every catalogue image, in chunks
-def squared_distances(queries, index, chunk = 256):
-    """
-    Squared L2 distance from each query to each indexed image.
-
-    Done a block of queries at a time so we never build the full
-    (queries x index x dims) array, which would be tens of gigabytes.
-    """
-    index_sq = np.sum(np.square(index), axis = 1)
-    distances = np.empty((len(queries), len(index)), dtype = np.float32)
-
-    for start in range(0, len(queries), chunk):
-        block = queries[start:start + chunk]
-        block_sq = np.sum(np.square(block), axis = 1)[:, None]
-        distances[start:start + chunk] = block_sq + index_sq[None, :] - 2.0 * (block @ index.T)
-
-    # floating point error can push a distance a hair below zero
-    return np.maximum(distances, 0.0)
-
-
-## The evaluation framework. precision@5 on its own cannot tell a good ranking
-## from a lucky one, because it ignores the order inside the top 5.
-def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
-                       k_list = (1, 5, 10), map_k = 10, seed = 42):
-    """
-    Precision@K and mAP@K over a fixed sample of validation queries.
-    """
-    queries = query_df.sample(n = min(n_queries, len(query_df)), random_state = seed)
-
-    query_embeddings = embed_paths(model, queries['path'].tolist())
-    distances = squared_distances(query_embeddings, index)
-
-    index_types = index_df['articleType'].to_numpy()
-    query_types = queries['articleType'].to_numpy()
-
-    # how many relevant items exist at all, so mAP is not punished for a class
-    # that simply has fewer than map_k members in the catalogue
-    type_counts = index_df['articleType'].value_counts()
-
-    top_k = max(max(k_list), map_k)
-    ordering = np.argsort(distances, axis = 1)[:, :top_k]
-
-    precisions = {k: [] for k in k_list}
-    average_precisions = []
-    nearest_distances = []
-
-    for row in range(len(queries)):
-        retrieved = index_types[ordering[row]]
-        relevant = retrieved == query_types[row]
-
-        for k in k_list:
-            precisions[k].append(relevant[:k].mean())
-
-        # average precision: credit a hit by how high up the ranking it landed
-        hits = 0
-        score = 0.0
-        for rank in range(map_k):
-            if relevant[rank]:
-                hits += 1
-                score += hits / (rank + 1)
-        possible = min(type_counts.get(query_types[row], 0), map_k)
-        average_precisions.append(score / possible if possible else 0.0)
-
-        nearest_distances.append(distances[row, ordering[row, 0]])
-
-    metrics = {f'p_at_{k}': float(np.mean(precisions[k])) for k in k_list}
-    metrics[f'map_at_{map_k}'] = float(np.mean(average_precisions))
-    metrics['mean_nn_distance'] = float(np.mean(nearest_distances))
-    metrics['n_queries'] = len(queries)
-    return metrics
-
-
-## The three numbers that would have caught our collapse on epoch 1
-def triplet_diagnostics(model, dataset, margin):
-    """
-    Mean positive distance, mean negative distance, and the share of triplets
-    still producing a gradient.
-
-    active_fraction is the one to watch. If it falls towards zero the model has
-    stopped learning whatever the loss says, because every triplet is already
-    outside the margin and max(..., 0) is clipping them all to nothing.
-    """
-    d_pos_all, d_neg_all, active = [], [], []
-
-    for anchor, reference, disimilar in dataset:
-        anchor_emb = model(anchor, training = False)
-        reference_emb = model(reference, training = False)
-        disimilar_emb = model(disimilar, training = False)
-
-        d_pos = tf.reduce_sum(tf.square(anchor_emb - reference_emb), axis = -1)
-        d_neg = tf.reduce_sum(tf.square(anchor_emb - disimilar_emb), axis = -1)
-
-        d_pos_all.append(d_pos.numpy())
-        d_neg_all.append(d_neg.numpy())
-        active.append((d_pos - d_neg + margin > 0).numpy())
-
-    return {
-        'mean_d_pos': float(np.mean(np.concatenate(d_pos_all))),
-        'mean_d_neg': float(np.mean(np.concatenate(d_neg_all))),
-        'active_fraction': float(np.mean(np.concatenate(active))),
-    }
-
-
-## Anchor/positive pairs, by position so they line up with the embedding rows
 def positive_pairs(types):
     """
     Every image is an anchor once, paired with a random different image of the
@@ -385,6 +231,9 @@ def mined_negatives(embeddings, types, anchor_positions, reference_positions,
                     margin, pool_size = 50, chunk = 512):
     """
     Semi-hard negative mining.
+
+    Semi-hard keeps a negative that is further away than the positive but
+    still inside the margin, which is the only band that produces a gradient.
 
     Scoring all ~30k candidates against all ~30k anchors is 900M distances per
     epoch, so we score a random pool of pool_size candidates per anchor instead.
@@ -468,7 +317,39 @@ def triplets_to_dataset(anchors, references, disimilars, batch_size = 32):
     return dataset.shuffle(1024).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
 
-## One training run for one configuration.
+
+# SECTION 6: TRAINING LOOP - one full run for one configuration
+
+def triplet_diagnostics(model, dataset, margin):
+    """
+    Mean positive distance, mean negative distance, and the share of triplets
+    still producing a gradient.
+
+    active_fraction is the one to watch. If it falls towards zero the model has
+    stopped learning whatever the loss says, because every triplet is already
+    outside the margin and max(..., 0) is clipping them all to nothing.
+    """
+    d_pos_all, d_neg_all, active = [], [], []
+
+    for anchor, reference, disimilar in dataset:
+        anchor_emb = model(anchor, training = False)
+        reference_emb = model(reference, training = False)
+        disimilar_emb = model(disimilar, training = False)
+
+        d_pos = tf.reduce_sum(tf.square(anchor_emb - reference_emb), axis = -1)
+        d_neg = tf.reduce_sum(tf.square(anchor_emb - disimilar_emb), axis = -1)
+
+        d_pos_all.append(d_pos.numpy())
+        d_neg_all.append(d_neg.numpy())
+        active.append((d_pos - d_neg + margin > 0).numpy())
+
+    return {
+        'mean_d_pos': float(np.mean(np.concatenate(d_pos_all))),
+        'mean_d_neg': float(np.mean(np.concatenate(d_neg_all))),
+        'active_fraction': float(np.mean(np.concatenate(active))),
+    }
+
+
 def train_tuned_model(model, train_df, val_df, config, verbose = True):
     """
     Train one configuration, keeping the weights from the best epoch rather
@@ -530,15 +411,166 @@ def train_tuned_model(model, train_df, val_df, config, verbose = True):
     model.set_weights(best_weights)
     return model, pd.DataFrame(history), best_epoch
 
-##  fine tune
-## The baseline samples negatives at random. A random negative is nearly always a different article type already sitting outside the margin, so max(..., 0)
-## clips it to zero and the batch teaches the model nothing. active_fraction in
-## the diagnostics is what shows this happening.
-## Semi-hard mining picks a negative that is further away than the positive but
-## still inside the margin, which is the only band that produces a gradient.
-## Two runs, one change between them, ranked on mAP@10. Off by default - flip
-## RUN_FINE_TUNE at the bottom of the file.
-## https://arxiv.org/abs/1503.03832  FaceNet, where semi-hard mining comes from
+
+
+# SECTION 7: SEARCH - embed the catalogue, then retrieve nearest neighbours
+
+
+def embed_paths(model, paths, batch_size = 32):
+    """
+    Embed a list of image paths in order.
+
+    Row i of the result is the embedding of paths[i], which is what lets us
+    map a neighbour back to its dataframe row.
+    """
+    dataset = tf.data.Dataset.from_tensor_slices(list(paths))
+    dataset = dataset.map(preprocess_image, num_parallel_calls = tf.data.AUTOTUNE)
+    dataset = dataset.batch(batch_size).prefetch(tf.data.AUTOTUNE)
+    return model.predict(dataset, verbose = 0)
+
+
+def search(model, query_path, index, df, k = 5):
+    """
+    Embed the query then return the k closest images from the index.
+    """
+    query_image = preprocess_image(query_path)
+    query_emb = model(tf.expand_dims(query_image, axis = 0), training = False).numpy()
+
+    distances = np.sum(np.square(index - query_emb), axis = 1)
+    nearest = np.argsort(distances)[:k]
+
+    return df.iloc[nearest], distances[nearest]
+
+
+def topk_predictions(model, index, index_df, query_df, n_queries = 100, k = 5):
+    """
+    Top k neighbours for the first n_queries validation images.
+
+    Returns the long form table we save as the task 4 output, plus precision@5
+    over the same pass so the number and the file always agree.
+    """
+    rows = []
+    scores = []
+
+    for i in range(min(n_queries, len(query_df))):
+        q = query_df.iloc[i]
+        res, dist = search(model, q['path'], index, index_df, k = k)
+
+        scores.append((res['articleType'] == q['articleType']).sum() / k)
+
+        for rank in range(len(res)):
+            rows.append({
+                'query_id': q['id'],
+                'query_articleType': q['articleType'],
+                'query_path': q['path'],
+                'rank': rank + 1,
+                'retrieved_id': res.iloc[rank]['id'],
+                'retrieved_articleType': res.iloc[rank]['articleType'],
+                'retrieved_path': res.iloc[rank]['path'],
+                'distance': dist[rank],
+            })
+
+    return pd.DataFrame(rows), float(np.mean(scores))
+
+
+def show_results(query_path, results, save_to = 'outputs/task_4/task4_query_grid.png'):
+    """
+    Show the query next to what we retrieved, saved as one row of pictures.
+    """
+    plt.figure(figsize = (12, 3))
+
+    plt.subplot(1, len(results) + 1, 1)
+    plt.imshow(preprocess_image(query_path))
+    plt.title("query")
+    plt.axis('off')
+
+    for i in range(len(results)):
+        row = results.iloc[i]
+        plt.subplot(1, len(results) + 1, i + 2)
+        plt.imshow(preprocess_image(row['path']))
+        plt.title(row['articleType'], fontsize = 8)
+        plt.axis('off')
+
+    plt.savefig(save_to, bbox_inches = 'tight')
+    plt.close()
+
+
+# SECTION 8: EVALUATION FRAMEWORK - Precision@K and mAP@K
+
+
+def squared_distances(queries, index, chunk = 256):
+    """
+    Squared L2 distance from each query to each indexed image.
+
+    Done a block of queries at a time so we never build the full
+    (queries x index x dims) array, which would be tens of gigabytes.
+    """
+    index_sq = np.sum(np.square(index), axis = 1)
+    distances = np.empty((len(queries), len(index)), dtype = np.float32)
+
+    for start in range(0, len(queries), chunk):
+        block = queries[start:start + chunk]
+        block_sq = np.sum(np.square(block), axis = 1)[:, None]
+        distances[start:start + chunk] = block_sq + index_sq[None, :] - 2.0 * (block @ index.T)
+
+    # floating point error can push a distance a hair below zero
+    return np.maximum(distances, 0.0)
+
+
+def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
+                       k_list = (1, 5, 10), map_k = 10, seed = 42):
+    """
+    Precision@K and mAP@K over a fixed sample of validation queries.
+
+    Precision@K on its own cannot tell a good ranking from a lucky one,
+    because it ignores the order inside the top K. mAP is rank sensitive,
+    so it is the number fine_tune ranks configurations on.
+    """
+    queries = query_df.sample(n = min(n_queries, len(query_df)), random_state = seed)
+
+    query_embeddings = embed_paths(model, queries['path'].tolist())
+    distances = squared_distances(query_embeddings, index)
+
+    index_types = index_df['articleType'].to_numpy()
+    query_types = queries['articleType'].to_numpy()
+
+    # how many relevant items exist at all, so mAP is not punished for a class
+    # that simply has fewer than map_k members in the catalogue
+    type_counts = index_df['articleType'].value_counts()
+
+    top_k = max(max(k_list), map_k)
+    ordering = np.argsort(distances, axis = 1)[:, :top_k]
+
+    precisions = {k: [] for k in k_list}
+    average_precisions = []
+    nearest_distances = []
+
+    for row in range(len(queries)):
+        retrieved = index_types[ordering[row]]
+        relevant = retrieved == query_types[row]
+
+        for k in k_list:
+            precisions[k].append(relevant[:k].mean())
+
+        # average precision: credit a hit by how high up the ranking it landed
+        hits = 0
+        score = 0.0
+        for rank in range(map_k):
+            if relevant[rank]:
+                hits += 1
+                score += hits / (rank + 1)
+        possible = min(type_counts.get(query_types[row], 0), map_k)
+        average_precisions.append(score / possible if possible else 0.0)
+
+        nearest_distances.append(distances[row, ordering[row, 0]])
+
+    metrics = {f'p_at_{k}': float(np.mean(precisions[k])) for k in k_list}
+    metrics[f'map_at_{map_k}'] = float(np.mean(average_precisions))
+    metrics['mean_nn_distance'] = float(np.mean(nearest_distances))
+    metrics['n_queries'] = len(queries)
+    return metrics
+
+# SECTION 9: FINE TUNING
 
 RESULTS_FILE = 'outputs/task_4/results_task4.csv'
 TUNED_MODEL_FILE = 'models/task_4/embedding_visual_search_tuned.keras'
@@ -599,7 +631,7 @@ def run_experiment(config, train_df, val_df, n_queries = 500):
     return model, row, history, index
 
 
-# def fine_tune(train_df, val_df, n_queries = 500):
+def fine_tune(train_df, val_df, n_queries = 500):
     """
     Run both configurations and save the better one by mAP@10.
 
@@ -646,6 +678,26 @@ def subsample_catalogue(df, n_types = 30):
     return df[df['articleType'].isin(biggest)].reset_index(drop = True)
 
 
+
+## SECTION 10: SWITCHES
+## Everything below this point is the pipeline that actually runs. These
+## three switches control the slow, optional parts of it so a normal re-run
+## stays fast:
+##
+##   RUN_FINE_TUNE  - compares baseline vs semi-hard on a 30 type subsample.
+##                    Trains two models from scratch. ~2 hours on CPU. Only
+##                    needs to run once - results are saved to RESULTS_FILE.
+##   RUN_FINALISE   - takes the tuned model that RUN_FINE_TUNE already saved
+##                    and re-embeds the FULL catalogue with it (no retraining,
+##                    one forward pass), so the tuned model can retrieve from
+
+
+RUN_FINE_TUNE = False
+RUN_FINALISE = False
+
+
+# SECTION 11: MAIN PIPELINE
+
 MODEL_FILE = 'models/task_4/embedding_visual_search.keras'
 INDEX_FILE = 'models/task_4/embeddings_task4.npy'
 
@@ -655,8 +707,7 @@ os.makedirs('outputs/task_4', exist_ok = True)
 # 1. Split data
 train_df, val_df = split_data(df_train)
 
-# 2. Load the model if we already trained one, otherwise train it now.
-# 4 epochs because the val loss starts going back up on the 5th.
+# 2. Load the baseline model if we already trained one, otherwise train it now.
 if Path(MODEL_FILE).exists() and Path(INDEX_FILE).exists():
     print('loading saved model')
     model = tf.keras.models.load_model(MODEL_FILE)
@@ -671,42 +722,32 @@ else:
     model.save(MODEL_FILE)
     np.save(INDEX_FILE, index)
 
-# 5. Query with a validation image, the model has never seen it
+# 4. Query with a validation image, the model has never seen it
 query = val_df.iloc[0]
 results, distances = search(model, query['path'], index, train_df, k = 5)
 
-# print(f"query: {query['articleType']}  {query['path']}")
-# print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
+print(f"query: {query['articleType']}  {query['path']}")
+print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
 
-# 6. Run the validation queries once, then use that same pass for both the
+# 5. Run the validation queries once, then use that same pass for both the
 # output file and the precision score
 predictions, precision = topk_predictions(model, index, train_df, val_df)
 predictions.to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
 
-# print(f"precision@5: {precision:.3f}")
+print(f"precision@5: {precision:.3f}")
 
-# 8. Save the query + neighbours picture for the report
-# show_results(query['path'], results)
+# 6. Save the query + neighbours picture for the report
+show_results(query['path'], results)
 
+# 7. Fine tuning - baseline vs semi-hard on a 30 type subsample. Off by
+# default because it retrains the model twice (~2 hours). See SECTION 10.
+if RUN_FINE_TUNE:
+    tuning_table = fine_tune(subsample_catalogue(train_df),
+                             subsample_catalogue(val_df))
+    print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
+                        'map_at_10', 'active_fraction']])
 
-## 9. Fine tuning. Off by default because it retrains the model twice. 
-# RUN_FINE_TUNE = False
-
-# if RUN_FINE_TUNE:
-#     tuning_table = fine_tune(subsample_catalogue(train_df),
-#                              subsample_catalogue(val_df))
-#     print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
-#                         'map_at_10', 'active_fraction']])
-
-
-# 10. Finalise the tuned model. fine_tune trains on a 30 type subsample so the
-# comparison runs in a sensible time, which leaves its index covering only
-# those 30 types. Task 4 asks us to retrieve from the whole catalogue, so we
-# re-embed all ~38k images with the tuned weights. No retraining here, just
-# one forward pass, and the network takes any image regardless of what it was
-# trained on.
-RUN_FINALISE = True
-
+# 8. Finalise the tuned model over the full catalogue. See SECTION 10.
 if RUN_FINALISE:
     tuned_model = tf.keras.models.load_model(TUNED_MODEL_FILE)
 
