@@ -17,18 +17,17 @@ from PIL import Image
 from skimage.color import rgb2gray
 from skimage.feature import hog
  
-# same path setup as train.py, so this script finds the same dataset/model
-# without needing src/
 ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_ROOT = ROOT / "A2_FashionDataset" / "FashionDataset"
 TEST_CSV = DATA_ROOT / "test" / "styles_prediction.csv"
 TEST_IMAGES = DATA_ROOT / "test" / "images_test"
  
 CACHE_DIR = ROOT / "cache"
-MODEL_DIR = ROOT / "models"
-OUTPUT_DIR = ROOT / "outputs"
-for _d in (CACHE_DIR, MODEL_DIR, OUTPUT_DIR):
-    _d.mkdir(exist_ok=True)
+MODEL_DIR = ROOT / "models" / "task_2"
+OUTPUT_DIR = ROOT / "outputs" / "task_2"
+CACHE_DIR.mkdir(exist_ok=True)
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
  
 IMG_WIDTH = 60
 IMG_HEIGHT = 80
@@ -36,7 +35,6 @@ IMG_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)
  
 TARGET_VALUE = "season"
 OUTPUT_CSV = OUTPUT_DIR / "task2_season_predictions.csv"
- 
  
 def load_test_images():
     # same idea as train.py's image cache - decode every test jpg once and
@@ -71,7 +69,6 @@ def load_test_images():
     np.save(cache_path, arr)
     np.save(index_path, np.array(ids, dtype=object))
     return arr, ids
- 
  
 def extract_features(images):
     # MUST match train.py's extract_features exactly (same HOG params, same
@@ -109,7 +106,6 @@ def extract_features(images):
     print(f"Saved features to {cache_path.name} (shape: {features.shape})")
     return features
  
- 
 def main():
     print("TASK 2: SEASON PREDICTION ON TEST SET")
  
@@ -139,7 +135,6 @@ def main():
     result.to_csv(OUTPUT_CSV, index=False)
     print(f"\nSaved predictions to {OUTPUT_CSV}")
     print("(id, season only - merge this into the shared submission file separately)")
- 
  
 if __name__ == "__main__":
     main()
