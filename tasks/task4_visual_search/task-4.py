@@ -28,13 +28,11 @@ df_train = pd.read_csv(train_path)
 # Setup image path for products
 df_train['path'] = './A2_FashionDataset/FashionDataset/train/images_train' + '/' + df_train['id'].astype(str) + '.jpg'
 
-
 # Preprocess dataset
 df_train = df_train.drop(columns=['Unnamed: 10','Unnamed: 11'], errors='ignore')
 
 # 5 rows in the csv point at images that are not in the folder, drop them``
 df_train = df_train[df_train['path'].apply(os.path.exists)]
-
 
 
 # The images are 60 wide by 80 tall.
@@ -125,7 +123,6 @@ def split_data(df):
     Reason is because this task focuses on finding top K of results.
     It not looking to predicts the a target vaulue.
     """
-    
     counts = df['articleType'].value_counts() # Total up the number of each the article type.
     keep = counts[counts >= 2].index  # Look for any articleType with total counts >=2 
     df = df[df['articleType'].isin(keep)]  # Filter out the dataframe, we only keep values where the articleType counts >= 2
@@ -169,8 +166,40 @@ def search(model, query_path, index, df, k = 5):
 
     return df.iloc[nearest], distances[nearest]
 
+## Every query image with its top k, saved as one row of pictures
+def topk_predictions(model, index, index_df, query_df, n_queries = 100, k = 5):
+    """
+    Top k neighbours for the first n_queries validation images.
+
+    Returns the long form table we save as the task 4 output, plus precision@5
+    over the same pass so the number and the file always agree.
+    """
+    rows = []
+    scores = []
+
+    for i in range(min(n_queries, len(query_df))):
+        q = query_df.iloc[i]
+        res, dist = search(model, q['path'], index, index_df, k = k)
+
+        scores.append((res['articleType'] == q['articleType']).sum() / k)
+
+        for rank in range(len(res)):
+            rows.append({
+                'query_id': q['id'],
+                'query_articleType': q['articleType'],
+                'query_path': q['path'],
+                'rank': rank + 1,
+                'retrieved_id': res.iloc[rank]['id'],
+                'retrieved_articleType': res.iloc[rank]['articleType'],
+                'retrieved_path': res.iloc[rank]['path'],
+                'distance': dist[rank],
+            })
+
+    return pd.DataFrame(rows), float(np.mean(scores))
+
+
 ## Show the query next to what we retrieved
-def show_results(query_path, results):
+def show_results(query_path, results, save_to = 'outputs/task_4/task4_query_grid.png'):
     plt.figure(figsize = (12, 3))
 
     plt.subplot(1, len(results) + 1, 1)
@@ -185,7 +214,7 @@ def show_results(query_path, results):
         plt.title(row['articleType'], fontsize = 8)
         plt.axis('off')
 
-    plt.savefig('outputs/task_4/task4_query_grid.png', bbox_inches = 'tight')
+    plt.savefig(save_to, bbox_inches = 'tight')
     plt.close()
 
 ## Every image through the model once. Row i of the result is the embedding of
@@ -226,10 +255,6 @@ def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
                        k_list = (1, 5, 10), map_k = 10, seed = 42):
     """
     Precision@K and mAP@K over a fixed sample of validation queries.
-
-    mAP is rank sensitive, so it is the number fine_tune ranks configurations
-    on. The query sample is seeded, so every configuration is scored on exactly
-    the same queries and the comparison is fair.
     """
     queries = query_df.sample(n = min(n_queries, len(query_df)), random_state = seed)
 
@@ -364,9 +389,6 @@ def mined_negatives(embeddings, types, anchor_positions, reference_positions,
     Scoring all ~30k candidates against all ~30k anchors is 900M distances per
     epoch, so we score a random pool of pool_size candidates per anchor instead.
     That is an approximation and the report should say so.
-
-    Semi-hard keeps a negative that is further away than the positive but still
-    inside the margin, which is the only band that produces a gradient.
     """
     n_total = len(types)
     negatives = np.empty(len(anchor_positions), dtype = np.int64)
@@ -577,7 +599,7 @@ def run_experiment(config, train_df, val_df, n_queries = 500):
     return model, row, history, index
 
 
-def fine_tune(train_df, val_df, n_queries = 500):
+# def fine_tune(train_df, val_df, n_queries = 500):
     """
     Run both configurations and save the better one by mAP@10.
 
@@ -653,47 +675,54 @@ else:
 query = val_df.iloc[0]
 results, distances = search(model, query['path'], index, train_df, k = 5)
 
-print(f"query: {query['articleType']}  {query['path']}")
-print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
+# print(f"query: {query['articleType']}  {query['path']}")
+# print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
 
 # 6. Run the validation queries once, then use that same pass for both the
 # output file and the precision score
-n_queries = 100
-rows = []
-scores = []
+predictions, precision = topk_predictions(model, index, train_df, val_df)
+predictions.to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
 
-for i in range(min(n_queries, len(val_df))):
-    q = val_df.iloc[i]
-    res, dist = search(model, q['path'], index, train_df, k = 5)
-
-    scores.append((res['articleType'] == q['articleType']).sum() / 5)
-
-    for rank in range(len(res)):
-        rows.append({
-            'query_id': q['id'],
-            'query_articleType': q['articleType'],
-            'query_path': q['path'],
-            'rank': rank + 1, 
-            'retrieved_id': res.iloc[rank]['id'],
-            'retrieved_articleType': res.iloc[rank]['articleType'],
-            'retrieved_path': res.iloc[rank]['path'],
-            'distance': dist[rank],
-        })
-
-# 7. Save the top 5 for each validation query so we have an output file
-pd.DataFrame(rows).to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
-
-print(f"precision@5: {np.mean(scores):.3f}")
+# print(f"precision@5: {precision:.3f}")
 
 # 8. Save the query + neighbours picture for the report
-show_results(query['path'], results)
+# show_results(query['path'], results)
 
 
 ## 9. Fine tuning. Off by default because it retrains the model twice. 
-RUN_FINE_TUNE = True
+# RUN_FINE_TUNE = False
 
-if RUN_FINE_TUNE:
-    tuning_table = fine_tune(subsample_catalogue(train_df),
-                             subsample_catalogue(val_df))
-    print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
-                        'map_at_10', 'active_fraction']])
+# if RUN_FINE_TUNE:
+#     tuning_table = fine_tune(subsample_catalogue(train_df),
+#                              subsample_catalogue(val_df))
+#     print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
+#                         'map_at_10', 'active_fraction']])
+
+
+# 10. Finalise the tuned model. fine_tune trains on a 30 type subsample so the
+# comparison runs in a sensible time, which leaves its index covering only
+# those 30 types. Task 4 asks us to retrieve from the whole catalogue, so we
+# re-embed all ~38k images with the tuned weights. No retraining here, just
+# one forward pass, and the network takes any image regardless of what it was
+# trained on.
+RUN_FINALISE = True
+
+if RUN_FINALISE:
+    tuned_model = tf.keras.models.load_model(TUNED_MODEL_FILE)
+
+    # the full catalogue this time, not the subsample
+    tuned_index = embed_paths(tuned_model, train_df['path'].tolist())
+    np.save(TUNED_INDEX_FILE, tuned_index)
+
+    tuned_predictions, tuned_precision = topk_predictions(tuned_model, tuned_index,
+                                                          train_df, val_df)
+    tuned_predictions.to_csv('outputs/task_4/task4_topk_predictions_tuned.csv',
+                             index = False)
+
+    # same query as the baseline figure, so the two grids are comparable
+    tuned_results, _ = search(tuned_model, query['path'], tuned_index, train_df, k = 5)
+    show_results(query['path'], tuned_results,
+                 save_to = 'outputs/task_4/task4_query_grid_tuned.png')
+
+    print(f"tuned precision@5 on the full catalogue: {tuned_precision:.3f}")
+    print(tuned_results[['id', 'articleType', 'baseColour', 'masterCategory']])
