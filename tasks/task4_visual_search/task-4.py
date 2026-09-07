@@ -67,7 +67,7 @@ def preprocess_image(filename):
 
 def print_image(index):
     """
-    Quick sanity check - show one preprocessed image from df_train.
+    Show one preprocessed image from df_train.
     """
     plt.figure(dpi = 28)
     image = preprocess_image(df_train['path'][index])
