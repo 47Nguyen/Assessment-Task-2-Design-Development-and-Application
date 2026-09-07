@@ -1,0 +1,12 @@
+target,model,macro_f1,balanced_acc,accuracy,majority_baseline,beats_baseline,notes
+season,baseline_majority,0.1660465518733235,0.25,0.4972146651120611,0.4972146651120611,False,Always predicts most frequent class: 'Summer'
+season,logreg_hog_colour,0.5779012008009204,0.6523013318931088,0.6135509781059723,0.4972146651120611,True,"HOG (8 orient, 10x10 cell) + 16-bin RGB histogram, StandardScaler"
+season,logreg_mean_rgb,0.2478034901420849,0.3473518442108845,0.281254048451872,0.4972146651120611,False,"3 features only: mean R,G,B per image - crudest possible colour signal"
+season,rf_baseline,0.7305821933591391,0.7058376103124433,0.7282031351211297,0.4972146651120611,True,"n_estimators=300, max_depth=None, weights=balanced"
+season,rf_tune_n100,0.7277035004360081,0.7029051267345846,0.7227620158051561,0.4972146651120611,True,"n_estimators=100, max_depth=None, weights=balanced"
+season,rf_tune_n300,0.7305821933591391,0.7058376103124433,0.7282031351211297,0.4972146651120611,True,"n_estimators=300, max_depth=None, weights=balanced"
+season,rf_tune_n800,0.733547030173006,0.7083095125064197,0.7318305479984454,0.4972146651120611,True,"n_estimators=800, max_depth=None, weights=balanced"
+season,rf_tune_depth20,0.7279040510222303,0.7084670319798444,0.7223733644254438,0.4972146651120611,True,"n_estimators=800, max_depth=20, weights=balanced"
+season,rf_tune_depth10,0.6529001815944115,0.6828265314845026,0.6487887031998963,0.4972146651120611,True,"n_estimators=800, max_depth=10, weights=balanced"
+season,rf_tune_noweights,0.698578709121644,0.6403107389177842,0.7297577406399792,0.4972146651120611,True,"n_estimators=800, max_depth=None, weights=none"
+season,rf_best,0.733547030173006,0.7083095125064197,0.7318305479984454,0.49721466511206114,True,"n_estimators=800, max_depth=None, weights=balanced"
