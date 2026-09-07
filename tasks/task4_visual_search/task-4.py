@@ -139,8 +139,7 @@ def embedding_model(embed_dim = 64, dense_units = 64, filters = (64, 64, 64),
     return model
 
 
-
-# SECTION 4: TRIPLET LOSS AND ONE STEP OF LEARNING
+# SECTION 4: triplet Loss train
 def triplet_loss(anchor_emb, reference_emb, disimilar_emb, margin = 0.5):
     """
     We want the anchor close to the reference and far from the disimilar.
@@ -176,7 +175,7 @@ def val_step(model, anchor, reference, disimilar, margin = 0.5):
 
 
 
-# SECTION 5: TRIPLET SAMPLING - how anchor/positive/negative get chosen
+# SECTION 5: Triplet sampling - how anchor/positive/negative get chosen
 
 
 def positive_pairs(types):
@@ -317,9 +316,7 @@ def triplets_to_dataset(anchors, references, disimilars, batch_size = 32):
     return dataset.shuffle(1024).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
 
-
-# SECTION 6: TRAINING LOOP - one full run for one configuration
-
+# SECTION 6: TTrain loop, loop over thenumber of epoches to train
 def triplet_diagnostics(model, dataset, margin):
     """
     Mean positive distance, mean negative distance, and the share of triplets
@@ -413,9 +410,7 @@ def train_tuned_model(model, train_df, val_df, config, verbose = True):
 
 
 
-# SECTION 7: SEARCH - embed the catalogue, then retrieve nearest neighbours
-
-
+# SECTION 7: SEARCH - embed the images, then retrieve nearest neighbours
 def embed_paths(model, paths, batch_size = 32):
     """
     Embed a list of image paths in order.
@@ -495,9 +490,7 @@ def show_results(query_path, results, save_to = 'outputs/task_4/task4_query_grid
     plt.close()
 
 
-# SECTION 8: EVALUATION FRAMEWORK - Precision@K and mAP@K
-
-
+# SECTION 8: Setup evaluation framework - Precision@K and mAP@K
 def squared_distances(queries, index, chunk = 256):
     """
     Squared L2 distance from each query to each indexed image.
@@ -570,7 +563,7 @@ def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
     metrics['n_queries'] = len(queries)
     return metrics
 
-# SECTION 9: FINE TUNING
+# SECTION 9: Fine Tunning the model
 
 RESULTS_FILE = 'outputs/task_4/results_task4.csv'
 TUNED_MODEL_FILE = 'models/task_4/embedding_visual_search_tuned.keras'
@@ -679,24 +672,13 @@ def subsample_catalogue(df, n_types = 30):
 
 
 
-## SECTION 10: SWITCHES
-## Everything below this point is the pipeline that actually runs. These
-## three switches control the slow, optional parts of it so a normal re-run
-## stays fast:
-##
-##   RUN_FINE_TUNE  - compares baseline vs semi-hard on a 30 type subsample.
-##                    Trains two models from scratch. ~2 hours on CPU. Only
-##                    needs to run once - results are saved to RESULTS_FILE.
-##   RUN_FINALISE   - takes the tuned model that RUN_FINE_TUNE already saved
-##                    and re-embeds the FULL catalogue with it (no retraining,
-##                    one forward pass), so the tuned model can retrieve from
-
+# SECTION 10: Setup
 
 RUN_FINE_TUNE = False
 RUN_FINALISE = False
 
 
-# SECTION 11: MAIN PIPELINE
+# SECTION 11: Running pipeline with functions swetup
 
 MODEL_FILE = 'models/task_4/embedding_visual_search.keras'
 INDEX_FILE = 'models/task_4/embeddings_task4.npy'
@@ -729,8 +711,7 @@ results, distances = search(model, query['path'], index, train_df, k = 5)
 print(f"query: {query['articleType']}  {query['path']}")
 print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
 
-# 5. Run the validation queries once, then use that same pass for both the
-# output file and the precision score
+# 5. Run the validation queries once, then use that same pass for both the output file and the precision score
 predictions, precision = topk_predictions(model, index, train_df, val_df)
 predictions.to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
 
@@ -739,15 +720,14 @@ print(f"precision@5: {precision:.3f}")
 # 6. Save the query + neighbours picture for the report
 show_results(query['path'], results)
 
-# 7. Fine tuning - baseline vs semi-hard on a 30 type subsample. Off by
-# default because it retrains the model twice (~2 hours). See SECTION 10.
+# 7. Fine tuning - baseline vs semi-hard on a 30 type subsample. Off by default because it retrains the model twice (~2 hours). See SECTION 10.
 if RUN_FINE_TUNE:
     tuning_table = fine_tune(subsample_catalogue(train_df),
                              subsample_catalogue(val_df))
     print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
                         'map_at_10', 'active_fraction']])
 
-# 8. Finalise the tuned model over the full catalogue. See SECTION 10.
+# 8. Finalise the tuned model over the full item list
 if RUN_FINALISE:
     tuned_model = tf.keras.models.load_model(TUNED_MODEL_FILE)
 
