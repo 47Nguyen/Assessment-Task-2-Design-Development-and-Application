@@ -3,8 +3,8 @@ A2_FashionDataset/
 
 # Generated artefacts
 cache/
-models/
-outputs/
+# models/
+# outputs/
 
 # Python
 __pycache__/
