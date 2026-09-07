@@ -16,14 +16,20 @@ tf.get_logger().setLevel('ERROR')
 np.random.seed(42)
 tf.random.set_seed(42)
 
+# References:
 # https://keras.io/examples/vision/siamese_network/
 # https://www.datacamp.com/tutorial/cnn-tensorflow-python
 # https://pyimagesearch.com/2023/02/13/building-a-dataset-for-triplet-loss-with-keras-and-tensorflow/
-# https://arxiv.org/abs/1503.03832  FaceNet, where semi-hard mining comes from
+# https://pyimagesearch.com/2023/03/06/triplet-loss-with-keras-and-tensorflow/
+# https://pyimagesearch.com/2023/03/20/training-and-making-predictions-with-siamese-networks-and-triplet-loss/
+# https://arxiv.org/abs/1503.03832
+# https://arxiv.org/abs/1703.07737
+# https://github.com/adambielski/siamese-triplet
+# https://github.com/13muskanp/Siamese-Network-with-Triplet-Loss
 
 
 
-# SECTION 1: LOAD DATA
+# SECTION 1: Load
 train_path = './A2_FashionDataset/FashionDataset/train/styles_train.csv'
 
 df_train = pd.read_csv(train_path)
@@ -43,7 +49,7 @@ target_shape = (80,60)
 
 
 
-# SECTION 2: IMAGE LOADING / PREPROCESSING
+# SECTION 2: Preprocessing
 
 def preprocess_image(filename):
     """
