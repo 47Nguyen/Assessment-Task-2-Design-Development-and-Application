@@ -4,10 +4,13 @@ Task 2: Predict season on the test set
 HOW TO RUN:
     From the project root folder (same place train.py runs from):
     python -m tasks.task2_season.predict
-
-Requires models/rf_season.joblib to already exist - run train.py first.
+    python -m tasks.task2_season.predict --model base
+ 
+Requires models/task_2/rf_season_{base,tune}.joblib to already exist - run
+train.py (and train.py --tune, if using --model tune) first.
 """
 
+import argparse
 from pathlib import Path
  
 import joblib
@@ -34,7 +37,6 @@ IMG_HEIGHT = 80
 IMG_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)
  
 TARGET_VALUE = "season"
-OUTPUT_CSV = OUTPUT_DIR / "task2_season_predictions.csv"
  
 def load_test_images():
     # same idea as train.py's image cache - decode every test jpg once and
@@ -107,12 +109,19 @@ def extract_features(images):
     return features
  
 def main():
+    parser = argparse.ArgumentParser(description="Predict season on the test set")
+    parser.add_argument("--model", choices=["base", "tune"], default="tune",
+                        help="which saved model to use (default: tune)")
+    args = parser.parse_args()
+ 
     print("TASK 2: SEASON PREDICTION ON TEST SET")
  
-    model_path = MODEL_DIR / f"rf_{TARGET_VALUE}.joblib"
+    model_path = MODEL_DIR / f"rf_{TARGET_VALUE}_{args.model}.joblib"
     if not model_path.exists():
+        train_cmd = ("python -m tasks.task2_season.train" if args.model == "base"
+                    else "python -m tasks.task2_season.train --tune")
         raise FileNotFoundError(
-            f"{model_path} not found - run 'python -m tasks.task2_season.train' first"
+            f"{model_path} not found - run '{train_cmd}' first"
         )
     saved = joblib.load(model_path)
     rf = saved["model"]
@@ -132,8 +141,9 @@ def main():
     print(pd.Series(season_labels).value_counts())
  
     result = pd.DataFrame({"id": ids, "season": season_labels})
-    result.to_csv(OUTPUT_CSV, index=False)
-    print(f"\nSaved predictions to {OUTPUT_CSV}")
+    output_csv = OUTPUT_DIR / f"task2_season_predictions_{args.model}.csv"
+    result.to_csv(output_csv, index=False)
+    print(f"\nSaved predictions to {output_csv}")
     print("(id, season only - merge this into the shared submission file separately)")
  
 if __name__ == "__main__":

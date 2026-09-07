@@ -29,7 +29,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.utils.class_weight import compute_class_weight
  
 SEED = 42
-
+ 
 ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_ROOT = ROOT / "A2_FashionDataset" / "FashionDataset"
 TRAIN_CSV = DATA_ROOT / "train" / "styles_train.csv"
@@ -240,7 +240,7 @@ def per_class_report(y_true, y_pred, label_encoder, top_n=None):
     df = df.sort_values("recall")
     return df.head(top_n) if top_n else df
  
-def plot_confusion(y_true, y_pred, label_encoder, target, max_classes=25):
+def plot_confusion(y_true, y_pred, label_encoder, target, model_name, max_classes=25):
     # confusion matrix normalised by row (so each row sums to 1 = "of the
     # items that were truly class X, what fraction got predicted as what")
     import seaborn as sns
@@ -273,7 +273,7 @@ def plot_confusion(y_true, y_pred, label_encoder, target, max_classes=25):
     ax.set_title(title)
     plt.tight_layout()
  
-    path = OUTPUT_DIR / f"confusion_{target}.png"
+    path = OUTPUT_DIR / f"confusion_{target}_{model_name}.png"
     fig.savefig(path, dpi=150, bbox_inches="tight")
     print(f"saved {path}")
     return fig
@@ -285,7 +285,7 @@ def class_weights(y):
     weights = compute_class_weight("balanced", classes=classes, y=np.asarray(y))
     return dict(zip(classes.tolist(), weights.tolist()))
  
-# Task 2 specific code
+# Task 2 code
 def extract_features(images, split_name="train"):
     # turns a stack of raw images into a table of numbers a classic ML model
     # (not a CNN) can actually use: HOG describes shape/edges, the colour
@@ -390,11 +390,20 @@ def run_baselines(X_train_feat, y_train, X_val_feat, y_val, X_train_raw, X_val_r
 def train_and_evaluate_rf(
     X_train_feat, y_train, X_val_feat, y_val, label_encoder,
     n_estimators=300, max_depth=None, use_class_weights=True,
-    model_name="rf_baseline", save_best_model=True,
+    model_name="rf_baseline", save_best_model=True, save_name=None,
 ):
     # this is the one function that actually builds a Random Forest, trains
     # it, scores it on the validation set, and (optionally) saves it - every
     # other function in this file just calls this one with different settings
+    #
+    # model_name is what shows up as the "model" column in results.csv (e.g.
+    # "rf_tune_n800") - save_name is what the saved FILES are called (e.g.
+    # "base" or "tune"). They're separate so results.csv keeps its detailed
+    # per-attempt names while the files on disk stay to just two: a "base"
+    # one from the plain run and a "tune" one from the winning --tune config.
+    if save_name is None:
+        save_name = model_name
+ 
     print(f"\nSTEP 4: TRAINING RANDOM FOREST ({model_name})")
     print(f"Config: n_estimators={n_estimators}, max_depth={max_depth}, "
           f"weighted={use_class_weights}")
@@ -421,17 +430,30 @@ def train_and_evaluate_rf(
              f"weights={'balanced' if use_class_weights else 'none'}")
     eval_row = evaluate_model(y_val, y_pred, TARGET_VALUE, model_name, notes=notes)
  
-    plot_confusion(y_val, y_pred, label_encoder, TARGET_VALUE)
+    plot_confusion(y_val, y_pred, label_encoder, TARGET_VALUE, save_name)
  
     print("\n--- Per-class results ---")
     print(per_class_report(y_val, y_pred, label_encoder).round(3))
  
     if save_best_model:
         # save the model together with the label encoder, so a later script
-        # can load both and know which number means which season
-        model_path = MODEL_DIR / f"rf_{TARGET_VALUE}.joblib"
-        joblib.dump({"model": rf, "label_encoder": label_encoder}, model_path)
-        print(f"\nSaved model to {model_path.name}")
+        # can load both and know which number means which season.
+        #
+        # two copies are written:
+        #   rf_{target}_{save_name}.joblib  - "base" from the plain run,
+        #     "tune" from the winning --tune config - two fixed names, never
+        #     overwritten by each other, so no manual backup step is needed
+        #   rf_{target}.joblib               - always the most recently
+        #     saved model, intentionally overwritten every time - this is
+        #     the "current" file predict.py loads by default
+        payload = {"model": rf, "label_encoder": label_encoder}
+        named_path = MODEL_DIR / f"rf_{TARGET_VALUE}_{save_name}.joblib"
+        joblib.dump(payload, named_path)
+        print(f"\nSaved model to {named_path.name}")
+ 
+        latest_path = MODEL_DIR / f"rf_{TARGET_VALUE}.joblib"
+        joblib.dump(payload, latest_path)
+        print(f"Also updated {latest_path.name} (the one predict.py loads by default)")
  
     return rf, eval_row
  
@@ -446,7 +468,7 @@ def run_hyperparameter_tuning(X_train_feat, y_train, X_val_feat, y_val, label_en
     n_estimators_grid = [100, 300, 800]
     max_depth_grid = [None, 20, 10]
  
-    # round 1: (max_depth=None, class weights on for all of these)
+    # round 1: how many trees? (max_depth=None, class weights on for all of these)
     best_n_estimators = 300
     best_f1 = -1.0
     for n in n_estimators_grid:
@@ -502,11 +524,11 @@ def run_hyperparameter_tuning(X_train_feat, y_train, X_val_feat, y_val, label_en
     train_and_evaluate_rf(
         X_train_feat, y_train, X_val_feat, y_val, label_encoder,
         n_estimators=best_n_estimators, max_depth=best_max_depth,
-        use_class_weights=best_use_weights, model_name="rf_best",
+        use_class_weights=best_use_weights, model_name="rf_best", save_name="tune",
         save_best_model=True,
     )
  
-def run_evidence(rf, X_val_raw, label_encoder, n_hog_features):
+def run_evidence(rf, X_val_raw, label_encoder, n_hog_features, model_name):
     # this task isn't really about getting a high score - the README explains
     # that "season" is more of a catalogue label than something visible in the
     # photo. so instead of chasing accuracy, this function builds two pieces
@@ -531,8 +553,8 @@ def run_evidence(rf, X_val_raw, label_encoder, n_hog_features):
     ax.set_ylabel("summed feature importance")
     ax.set_title("Random Forest: shape vs colour importance")
     plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "season_feature_importance.png", dpi=150, bbox_inches="tight")
-    print(f"saved {OUTPUT_DIR / 'season_feature_importance.png'}")
+    fig.savefig(OUTPUT_DIR / f"season_feature_importance_{model_name}.png", dpi=150, bbox_inches="tight")
+    print(f"saved {OUTPUT_DIR / f'season_feature_importance_{model_name}.png'}")
  
     # now look for pairs of validation images that are the same articleType
     # (so they're already similar kinds of item) but were given different
@@ -578,8 +600,8 @@ def run_evidence(rf, X_val_raw, label_encoder, n_hog_features):
             axes[row_i, col].axis("off")
     plt.suptitle("Near-identical items labelled with different seasons")
     plt.tight_layout()
-    fig.savefig(OUTPUT_DIR / "season_near_duplicates.png", dpi=150, bbox_inches="tight")
-    print(f"saved {OUTPUT_DIR / 'season_near_duplicates.png'} "
+    fig.savefig(OUTPUT_DIR / f"season_near_duplicates_{model_name}.png", dpi=150, bbox_inches="tight")
+    print(f"saved {OUTPUT_DIR / f'season_near_duplicates_{model_name}.png'} "
           f"({n_show} pairs, closest pixel-distance {best_pairs[0][0]:.1f})")
  
 def parse_args():
@@ -631,10 +653,11 @@ def main():
             use_class_weights=not args.no_class_weights,
             model_name="rf_baseline",
             save_best_model=True,
+            save_name="base",
         )
         # only build the evidence for a single, real run - not useful to
         # repeat this after every combination tried during --tune
-        run_evidence(rf, X_val_raw, label_encoder, n_hog_features)
+        run_evidence(rf, X_val_raw, label_encoder, n_hog_features, model_name="base")
  
     print("\nTRAINING PIPELINE COMPLETED SUCCESSFULLY!")
     print(f"Results logged to: {OUTPUT_DIR / 'results.csv'}")
