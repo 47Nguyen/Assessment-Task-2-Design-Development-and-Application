@@ -22,3 +22,4 @@ desktop.ini
 # Editors
 .vscode/
 .idea/
+venv/
