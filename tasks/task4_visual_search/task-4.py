@@ -30,13 +30,11 @@ df_train['path'] = './A2_FashionDataset/FashionDataset/train/images_train' + '/'
 
 
 # Preprocess dataset
-df_train = df_train.drop(columns=['Unnamed: 10','Unnamed: 11'])
+df_train = df_train.drop(columns=['Unnamed: 10','Unnamed: 11'], errors='ignore')
 
 # 5 rows in the csv point at images that are not in the folder, drop them``
 df_train = df_train[df_train['path'].apply(os.path.exists)]
 
-# print(df_train)
-# count = df_train['masterCategory'].nunique()
 
 
 # The images are 60 wide by 80 tall.
@@ -78,31 +76,6 @@ def preprocess_triplets(anchor, reference, disimilar):
         preprocess_image(reference),
         preprocess_image(disimilar),
     )
-
-## Define our anchor
-def anchor_references(df):
-    """ 
-    Anchor: a random sample image.
-    reference: a different image that's "similar" to the anchor by your chosen definition.
-    disimilar: an image that's "dissimilar" by that same definition.
-    """
-    anchors, references, disimilars = [], [], []
-    grouped_article = df.groupby('articleType')['path'].apply(list).to_dict()
-    types = list(grouped_article.keys())
-    for article_type, paths in grouped_article.items():
-        if len(paths) < 2:  # It because there nothing to be similar there are only 2 items
-            continue
-        for i in range(len(paths)): # For every image treat it as an anchor once
-            anchor = paths[i]
-            reference = np.random.choice([
-                p for p in paths if p != anchor
-            ])
-            neg_type = np.random.choice([t for t in types if t != article_type])
-            disimilar = np.random.choice(grouped_article[neg_type])
-            anchors.append(anchor)
-            references.append(reference)
-            disimilars.append(disimilar)
-    return anchors, references, disimilars
 
 ## Embedding network (the "twin" CNN shared by anchor/reference/disimilar)
 def embedding_model(embed_dim = 64, dense_units = 64, filters = (64, 64, 64),
@@ -161,22 +134,12 @@ def split_data(df):
     
     return train_df, val_df
 
-def list_to_dataset(df):
-    anchors_list, ref_list, dis_list = anchor_references(df)
-    
-    # List to dataset
-    to_dataset = tf.data.Dataset.from_tensor_slices((anchors_list, ref_list, dis_list))
-    
-    #Path to image
-    dataset = to_dataset.map(preprocess_triplets)
-    dataset = dataset.shuffle(1024).batch(32).prefetch(tf.data.AUTOTUNE)
-    return dataset
-
 ## Triplet loss: we want the anchor close to the reference and far from the disimilar
 def triplet_loss(anchor_emb, reference_emb, disimilar_emb, margin = 0.5):
     d_pos = tf.reduce_sum(tf.square(anchor_emb - reference_emb), axis = -1)
     d_neg = tf.reduce_sum(tf.square(anchor_emb - disimilar_emb), axis = -1)
     return tf.reduce_mean(tf.maximum(d_pos - d_neg + margin, 0.0))
+
 ## One batch of learning, weights get updated here
 def train_step(model, optimizer, anchor, reference, disimilar, margin = 0.5):
     with tf.GradientTape() as tape:
@@ -195,36 +158,6 @@ def val_step(model, anchor, reference, disimilar, margin = 0.5):
     reference_emb = model(reference, training = False)
     disimilar_emb = model(disimilar, training = False)
     return triplet_loss(anchor_emb, reference_emb, disimilar_emb, margin)
-
-def train_model(model, train_dataset, val_dataset, epochs = 4, learning_rate = 1e-4):
-    optimizer = tf.keras.optimizers.Adam(learning_rate)
-
-    for epoch in range(epochs):
-        train_losses = []
-        for anchor, reference, disimilar in train_dataset:
-            loss = train_step(model, optimizer, anchor, reference, disimilar)
-            train_losses.append(loss.numpy())
-
-        val_losses = []
-        for anchor, reference, disimilar in val_dataset:
-            loss = val_step(model, anchor, reference, disimilar)
-            val_losses.append(loss.numpy())
-
-        print(f"epoch {epoch + 1}/{epochs} - train loss: {np.mean(train_losses):.4f} - val loss: {np.mean(val_losses):.4f}")
-
-    return model
-
-
-## Run every catalogue image through the model once, this is what we search over
-def build_index(model, df, batch_size = 32):
-    paths = df['path'].tolist()
-
-    dataset = tf.data.Dataset.from_tensor_slices(paths)
-    dataset = dataset.map(preprocess_image).batch(batch_size).prefetch(tf.data.AUTOTUNE)
-
-    embeddings = model.predict(dataset, verbose = 0)
-    return embeddings
-
 
 ## Embed the query then return the k closest images from the index
 def search(model, query_path, index, df, k = 5):
@@ -254,25 +187,6 @@ def show_results(query_path, results):
 
     plt.savefig('outputs/task_4/task4_query_grid.png', bbox_inches = 'tight')
     plt.close()
-
-## ===========================================================================
-## FINE TUNING
-## ---------------------------------------------------------------------------
-## House rule from the Task 1 README: change one thing at a time, and log every
-## run under its own name so the rows become the report's tuning table.
-##
-## Nothing below runs on its own. Flip RUN_FINE_TUNE at the bottom of the file
-## to start a sweep. The original pipeline above is left exactly as it was.
-##
-## https://arxiv.org/abs/1503.03832  FaceNet, where semi-hard mining comes from
-## https://arxiv.org/abs/1703.07737  In Defense of the Triplet Loss
-## https://jmlr.org/papers/v13/bergstra12a.html  why random search beats grid
-## ===========================================================================
-
-RESULTS_FILE = 'outputs/task_4/results_task4.csv'
-TUNED_MODEL_FILE = 'models/task_4/embedding_visual_search_tuned.keras'
-TUNED_INDEX_FILE = 'models/task_4/embeddings_task4_tuned.npy'
-
 
 ## Every image through the model once. Row i of the result is the embedding of
 ## paths[i], which is what lets us map a neighbour back to its dataframe row.
@@ -425,7 +339,7 @@ def random_negatives(types, anchor_positions):
     The original sampler: pick a different article type uniformly, then a
     random image from inside it.
 
-    Kept exactly as anchor_references had it so the baseline row stays
+    Kept exactly as the original sampler had it, so the baseline row stays
     comparable with the precision@5 we have already reported.
     """
     positions_by_type = {}
@@ -443,18 +357,16 @@ def random_negatives(types, anchor_positions):
 
 
 def mined_negatives(embeddings, types, anchor_positions, reference_positions,
-                    sampler, margin, pool_size = 50, chunk = 512):
+                    margin, pool_size = 50, chunk = 512):
     """
-    Semi-hard and hardest negative mining.
+    Semi-hard negative mining.
 
     Scoring all ~30k candidates against all ~30k anchors is 900M distances per
     epoch, so we score a random pool of pool_size candidates per anchor instead.
     That is an approximation and the report should say so.
 
     Semi-hard keeps a negative that is further away than the positive but still
-    inside the margin, which is the only band that produces a gradient. Hardest
-    takes the closest negative and is the variant known to collapse - we run it
-    so the report can show that happening rather than assert it.
+    inside the margin, which is the only band that produces a gradient.
     """
     n_total = len(types)
     negatives = np.empty(len(anchor_positions), dtype = np.int64)
@@ -479,18 +391,15 @@ def mined_negatives(embeddings, types, anchor_positions, reference_positions,
         # and more once subsample_catalogue has trimmed to the biggest types.
         no_candidate = same_type.all(axis = 1)
 
-        if sampler == 'hardest':
-            choice = d_neg.argmin(axis = 1)
-        else:
-            in_band = (d_neg > d_pos[:, None]) & (d_neg < d_pos[:, None] + margin)
-            banded = np.where(in_band, d_neg, np.inf)
-            choice = banded.argmin(axis = 1)
+        in_band = (d_neg > d_pos[:, None]) & (d_neg < d_pos[:, None] + margin)
+        banded = np.where(in_band, d_neg, np.inf)
+        choice = banded.argmin(axis = 1)
 
-            # nothing in the band for this anchor, fall back to the hardest
-            # candidate the pool did offer
-            empty = ~in_band.any(axis = 1)
-            if empty.any():
-                choice[empty] = d_neg[empty].argmin(axis = 1)
+        # nothing in the band for this anchor, fall back to the closest
+        # candidate the pool did offer
+        empty = ~in_band.any(axis = 1)
+        if empty.any():
+            choice[empty] = d_neg[empty].argmin(axis = 1)
 
         chosen = pool[np.arange(len(anchors)), choice]
 
@@ -520,53 +429,32 @@ def build_triplets(df, sampler = 'random', embeddings = None, margin = 0.5, pool
         disimilars = random_negatives(types, anchors)
     else:
         disimilars = mined_negatives(embeddings, types, anchors, references,
-                                     sampler, margin, pool_size)
+                                     margin, pool_size)
 
     return list(paths[anchors]), list(paths[references]), list(paths[disimilars])
 
 
-def augment_image(image):
+def triplets_to_dataset(anchors, references, disimilars, batch_size = 32):
     """
-    Light augmentation only.
+    Triplet paths to a batched dataset of images.
 
-    A horizontal flip is safe for garments, and brightness/contrast jitter
-    stands in for photo variation. We deliberately do not shift hue, because
-    baseColour is part of what "similar" means in this task - recolouring the
-    image would be teaching the model the wrong thing.
-    """
-    image = tf.image.random_flip_left_right(image)
-    image = tf.image.random_brightness(image, max_delta = 0.1)
-    image = tf.image.random_contrast(image, lower = 0.9, upper = 1.1)
-    return tf.clip_by_value(image, 0.0, 1.0)
-
-
-def triplets_to_dataset(anchors, references, disimilars, batch_size = 32, augment = False):
-    """
-    Same job as list_to_dataset, but takes triplets that were built outside so
-    they can be re-mined between epochs, and can switch augmentation on.
+    Takes triplets built outside so they can be re-mined between epochs.
     """
     dataset = tf.data.Dataset.from_tensor_slices((anchors, references, disimilars))
     dataset = dataset.map(preprocess_triplets, num_parallel_calls = tf.data.AUTOTUNE)
 
-    if augment:
-        dataset = dataset.map(
-            lambda a, r, d: (augment_image(a), augment_image(r), augment_image(d)),
-            num_parallel_calls = tf.data.AUTOTUNE)
-
     return dataset.shuffle(1024).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
 
-## One training run for one configuration. Kept separate from train_model above
-## so the pipeline we already have keeps working untouched - once the sweep
-## picks a winner, this replaces it and train_model can go.
+## One training run for one configuration.
 def train_tuned_model(model, train_df, val_df, config, verbose = True):
     """
-    Train one configuration, keeping the best epoch rather than the last.
+    Train one configuration, keeping the weights from the best epoch rather
+    than whatever the last epoch happened to produce.
 
-    Early stopping watches val loss, which is fair inside a single run because
-    margin is fixed there. Across runs it is not - margin sits inside the loss,
-    so a run with margin 0.1 always looks better than one with margin 1.0 - and
-    that is why fine_tune ranks configurations on mAP@10 instead.
+    Val loss picks the best epoch, which is fair inside a single run because
+    margin is fixed there. Across runs it is not - margin sits inside the loss -
+    which is why fine_tune ranks the two configurations on mAP@10 instead.
     """
     optimizer = tf.keras.optimizers.Adam(config['learning_rate'])
 
@@ -577,7 +465,6 @@ def train_tuned_model(model, train_df, val_df, config, verbose = True):
     best_loss = np.inf
     best_weights = model.get_weights()
     best_epoch = 1
-    waited = 0
     history = []
 
     for epoch in range(config['epochs']):
@@ -591,8 +478,7 @@ def train_tuned_model(model, train_df, val_df, config, verbose = True):
         train_triplets = build_triplets(train_df, config['sampler'], embeddings,
                                         config['margin'], config['pool_size'])
         train_dataset = triplets_to_dataset(*train_triplets,
-                                            batch_size = config['batch_size'],
-                                            augment = config['augment'])
+                                            batch_size = config['batch_size'])
 
         train_losses = []
         for anchor, reference, disimilar in train_dataset:
@@ -618,32 +504,47 @@ def train_tuned_model(model, train_df, val_df, config, verbose = True):
             best_loss = val_loss
             best_weights = model.get_weights()
             best_epoch = epoch + 1
-            waited = 0
-        else:
-            waited += 1
-            if config['patience'] and waited >= config['patience']:
-                if verbose:
-                    print(f"  early stop at epoch {epoch + 1}, best was epoch {best_epoch}")
-                break
 
-    # the original script saved whatever the last epoch happened to produce
     model.set_weights(best_weights)
     return model, pd.DataFrame(history), best_epoch
 
+##  fine tune
+## The baseline samples negatives at random. A random negative is nearly always a different article type already sitting outside the margin, so max(..., 0)
+## clips it to zero and the batch teaches the model nothing. active_fraction in
+## the diagnostics is what shows this happening.
+## Semi-hard mining picks a negative that is further away than the positive but
+## still inside the margin, which is the only band that produces a gradient.
+## Two runs, one change between them, ranked on mAP@10. Off by default - flip
+## RUN_FINE_TUNE at the bottom of the file.
+## https://arxiv.org/abs/1503.03832  FaceNet, where semi-hard mining comes from
 
-def run_experiment(config, train_df, val_df, n_queries = 500, verbose = True):
-    """
-    Train one configuration end to end and hand back a single results row.
-    """
-    config = {**DEFAULT_CONFIG, **config}
+RESULTS_FILE = 'outputs/task_4/results_task4.csv'
+TUNED_MODEL_FILE = 'models/task_4/embedding_visual_search_tuned.keras'
+TUNED_INDEX_FILE = 'models/task_4/embeddings_task4_tuned.npy'
 
-    # reseed per run so two configurations differ by the thing we changed and
-    # not by which triplets they happened to draw
+## The baseline reproduces the model we already trained, so its row is the
+## number semi-hard has to beat.
+BASE_CONFIG = {
+    'margin': 0.5, 'embed_dim': 64, 'dense_units': 64, 'filters': (64, 64, 64),
+    'dropout': 0.0, 'normalise': True, 'learning_rate': 1e-4, 'batch_size': 32,
+    'warmup_epochs': 1, 'pool_size': 50, 'seed': 42,
+}
+
+EXPERIMENTS = [
+    {**BASE_CONFIG, 'name': 'baseline_random', 'sampler': 'random', 'epochs': 4},
+    {**BASE_CONFIG, 'name': 'tuned_semihard', 'sampler': 'semihard', 'epochs': 10},
+]
+
+
+def run_experiment(config, train_df, val_df, n_queries = 500):
+    """
+    Train one configuration end to end and hand back its results row.
+    """
+    # reseed per run so the two rows differ by the sampler and not by which
+    # triplets they happened to draw
     np.random.seed(config['seed'])
     tf.random.set_seed(config['seed'])
-
-    if verbose:
-        print(f"\n=== {config['name']} - {config['notes']} ===")
+    print(f"\n=== {config['name']} ({config['sampler']} negatives) ===")
 
     started = time.time()
 
@@ -653,7 +554,7 @@ def run_experiment(config, train_df, val_df, n_queries = 500, verbose = True):
                             dropout = config['dropout'],
                             normalise = config['normalise'])
 
-    model, history, best_epoch = train_tuned_model(model, train_df, val_df, config, verbose)
+    model, history, best_epoch = train_tuned_model(model, train_df, val_df, config)
     train_seconds = time.time() - started
 
     index = embed_paths(model, train_df['path'].tolist(), config['batch_size'])
@@ -663,179 +564,70 @@ def run_experiment(config, train_df, val_df, n_queries = 500, verbose = True):
     row = {
         'name': config['name'],
         'sampler': config['sampler'],
-        'margin': config['margin'],
-        'embed_dim': config['embed_dim'],
-        'filters': str(config['filters']),
-        'dropout': config['dropout'],
-        'normalise': config['normalise'],
-        'learning_rate': config['learning_rate'],
-        'batch_size': config['batch_size'],
-        'augment': config['augment'],
         'epochs': config['epochs'],
         'best_epoch': best_epoch,
-        'seed': config['seed'],
         'train_loss': round(float(best['train_loss']), 4),
         'val_loss': round(float(best['val_loss']), 4),
         'active_fraction': round(float(best['active_fraction']), 4),
         'mean_d_pos': round(float(best['mean_d_pos']), 4),
         'mean_d_neg': round(float(best['mean_d_neg']), 4),
         'train_seconds': round(train_seconds, 1),
-        'index_mb': round(index.nbytes / 1e6, 2),
-        'notes': config['notes'],
         **metrics,
     }
     return model, row, history, index
 
 
-def fine_tune(train_df, val_df, experiments = None, results_file = RESULTS_FILE,
-              n_queries = 500, save_best = True):
+def fine_tune(train_df, val_df, n_queries = 500):
     """
-    Run every configuration in turn and return the table sorted by mAP@10.
+    Run both configurations and save the better one by mAP@10.
 
-    One row per run is appended to results_file as each run finishes, so a
-    crash halfway through a sweep does not lose the runs already done. Each run
-    also drops its per-epoch history next to it, which is what the learning
-    curve and the collapse figure in the report are drawn from.
+    Ranked on mAP rather than val loss because margin sits inside the loss, so
+    losses are only comparable within a run. Each run also drops its per-epoch
+    history, which is what the learning curve in the report is drawn from.
 
     The winner is saved alongside the original model, never over the top of it.
     """
-    experiments = experiments if experiments is not None else TUNING_EXPERIMENTS
-
     os.makedirs('outputs/task_4', exist_ok = True)
     os.makedirs('models/task_4', exist_ok = True)
 
     rows = []
     best_score = -np.inf
 
-    for config in experiments:
+    for config in EXPERIMENTS:
         model, row, history, index = run_experiment(config, train_df, val_df, n_queries)
         rows.append(row)
-
-        pd.DataFrame([row]).to_csv(results_file, mode = 'a',
-                                   header = not Path(results_file).exists(),
-                                   index = False)
         history.to_csv(f"outputs/task_4/history_{row['name']}.csv", index = False)
 
         print(f"{row['name']}: P@1 {row['p_at_1']:.3f}  P@5 {row['p_at_5']:.3f}  "
               f"P@10 {row['p_at_10']:.3f}  mAP@10 {row['map_at_10']:.3f}  "
               f"active {row['active_fraction']:.2f}")
 
-        if save_best and row['map_at_10'] > best_score:
+        if row['map_at_10'] > best_score:
             best_score = row['map_at_10']
             model.save(TUNED_MODEL_FILE)
             np.save(TUNED_INDEX_FILE, index)
 
-    return pd.DataFrame(rows).sort_values('map_at_10', ascending = False)
+    table = pd.DataFrame(rows)
+    table.to_csv(RESULTS_FILE, index = False)
+    return table
 
 
-def subsample_catalogue(df, n_types = 30, seed = 42):
+def subsample_catalogue(df, n_types = 30):
     """
-    A smaller catalogue for the coarse sweep, so one run takes minutes instead
-    of the best part of an hour.
+    A smaller catalogue for a quicker comparison, so a run takes minutes
+    instead of the best part of an hour.
 
-    Keeps the n_types largest article types, which is enough to rank
-    configurations against each other. The winner is then re-run on the full
-    catalogue before anything goes in the report.
+    Keeps the n_types largest article types, which is enough to tell the two
+    samplers apart. The winner can then be re-run on the full catalogue.
     """
     biggest = df['articleType'].value_counts().head(n_types).index
     return df[df['articleType'].isin(biggest)].reset_index(drop = True)
 
 
-## The defaults reproduce the model we already trained, so the first row of the
-## sweep is the number we are trying to beat.
-DEFAULT_CONFIG = {
-    'name': 'triplet_baseline',
-    'sampler': 'random',
-    'margin': 0.5,
-    'embed_dim': 64,
-    'dense_units': 64,
-    'filters': (64, 64, 64),
-    'dropout': 0.0,
-    'normalise': True,
-    'learning_rate': 1e-4,
-    'batch_size': 32,
-    'epochs': 4,
-    'patience': None,
-    'warmup_epochs': 1,
-    'pool_size': 50,
-    'augment': False,
-    'seed': 42,
-    'notes': '',
-}
-
-## Once the sampler is settled every later run inherits it, so each row really
-## does change one thing against the rows above it.
-TUNED_BASE = {'sampler': 'semihard', 'epochs': 20, 'patience': 3}
-
-## The sweep. Same layout as the tuning tables in the Task 1 and Task 3
-## READMEs: what we changed, what we call it, and the question it answers.
-TUNING_EXPERIMENTS = [
-    # 1. The sampler. Random negatives are nearly all outside the margin
-    #    already, so most batches produce no gradient. This is the change we
-    #    expect to matter more than everything below it put together.
-    {'name': 'triplet_baseline',
-     'notes': 'the model we already have, the row to beat'},
-    {'name': 'triplet_semihard', **TUNED_BASE,
-     'notes': 'does mining the useful negatives fix the collapse'},
-    {'name': 'triplet_hardest', **TUNED_BASE, 'sampler': 'hardest',
-     'notes': 'expected to collapse, run it so the report can show it'},
-
-    # 2. Learning rate. 1e-4 over 4 epochs was almost certainly undertrained.
-    {'name': 'triplet_lr_3e4', **TUNED_BASE, 'learning_rate': 3e-4,
-     'notes': 'was 1e-4 simply too slow'},
-    {'name': 'triplet_lr_1e3', **TUNED_BASE, 'learning_rate': 1e-3,
-     'notes': 'how far can the learning rate go before it destabilises'},
-
-    # 3. Margin. On the unit sphere squared distance runs 0 to 4, so 0.5 is a
-    #    narrow target. Anything at or above 4 is unsatisfiable by definition.
-    {'name': 'triplet_margin_0.2', **TUNED_BASE, 'margin': 0.2,
-     'notes': 'an easier target, does it train more stably'},
-    {'name': 'triplet_margin_1.0', **TUNED_BASE, 'margin': 1.0,
-     'notes': 'does demanding more separation give a cleaner ranking'},
-
-    # 4. Embedding size. Overlay this against the PCA dimension sweep on one
-    #    axis and the figure answers both questions at once.
-    {'name': 'triplet_dim_32', **TUNED_BASE, 'embed_dim': 32,
-     'notes': 'is 64 more room than the task needs'},
-    {'name': 'triplet_dim_128', **TUNED_BASE, 'embed_dim': 128,
-     'notes': 'does a bigger embedding separate the rare types'},
-    {'name': 'triplet_dim_256', **TUNED_BASE, 'embed_dim': 256,
-     'notes': 'where does adding dimensions stop paying'},
-
-    # 5. Capacity. Four blocks is the ceiling - 80x60 through valid 3x3 convs
-    #    and 2x2 pools reaches 3x1, and a fifth block has nothing left to
-    #    convolve over.
-    {'name': 'triplet_widening', **TUNED_BASE, 'filters': (32, 64, 128),
-     'notes': 'is the usual widening shape better than three flat layers'},
-    {'name': 'triplet_deeper', **TUNED_BASE, 'filters': (32, 64, 128, 256),
-     'notes': 'does a fourth block help at this resolution'},
-
-    # 6. Batch size. With in-pool mining this is not just a speed knob - it
-    #    sets how many candidates we get to choose a negative from.
-    {'name': 'triplet_batch_128', **TUNED_BASE, 'batch_size': 128,
-     'notes': 'bigger batches, more stable gradient'},
-    {'name': 'triplet_batch_256', **TUNED_BASE, 'batch_size': 256,
-     'notes': 'does the gain keep going or flatten off'},
-
-    # 7. Regularisation, once we finally have a model that trains long enough
-    #    to overfit.
-    {'name': 'triplet_dropout_0.3', **TUNED_BASE, 'dropout': 0.3,
-     'notes': 'is the tuned model overfitting the catalogue'},
-    {'name': 'triplet_augment', **TUNED_BASE, 'augment': True,
-     'notes': 'does flip and brightness jitter add anything'},
-
-    # 8. The normalisation the original code added as a guess. Squared L2 and
-    #    cosine rank identically on unit vectors, so this is the only version
-    #    of that question worth spending a run on.
-    {'name': 'triplet_unnormalised', **TUNED_BASE, 'normalise': False,
-     'notes': 'does the model cheat the margin without the unit sphere'},
-]
-
-
 MODEL_FILE = 'models/task_4/embedding_visual_search.keras'
 INDEX_FILE = 'models/task_4/embeddings_task4.npy'
 
-# os.makedirs('models/task_4', exist_ok = True)
+os.makedirs('models/task_4', exist_ok = True)
 os.makedirs('outputs/task_4', exist_ok = True)
 
 # 1. Split data
@@ -848,16 +640,12 @@ if Path(MODEL_FILE).exists() and Path(INDEX_FILE).exists():
     model = tf.keras.models.load_model(MODEL_FILE)
     index = np.load(INDEX_FILE)
 else:
-    train_dataset = list_to_dataset(train_df)
-    val_dataset = list_to_dataset(val_df)
+    # BASE_CONFIG is the original setup - random negatives, 4 epochs, no early
+    # stopping - so this rebuilds the same baseline through the one training
+    # path the file now has.
+    model, _, _, index = run_experiment(EXPERIMENTS[0], train_df, val_df)
 
-    model = embedding_model()
-    model = train_model(model, train_dataset, val_dataset, epochs = 4)
-
-    # 3. Embed the whole training catalogue so we have something to search
-    index = build_index(model, train_df)
-
-    # 4. Save both so the next run can skip straight to searching
+    # 3. Save both so the next run can skip straight to searching
     model.save(MODEL_FILE)
     np.save(INDEX_FILE, index)
 
@@ -885,7 +673,7 @@ for i in range(min(n_queries, len(val_df))):
             'query_id': q['id'],
             'query_articleType': q['articleType'],
             'query_path': q['path'],
-            'rank': rank + 1,
+            'rank': rank + 1, 
             'retrieved_id': res.iloc[rank]['id'],
             'retrieved_articleType': res.iloc[rank]['articleType'],
             'retrieved_path': res.iloc[rank]['path'],
@@ -901,14 +689,11 @@ print(f"precision@5: {np.mean(scores):.3f}")
 show_results(query['path'], results)
 
 
-## 9. Fine tuning. Off by default because a full sweep retrains the model once
-## per row of TUNING_EXPERIMENTS. Start with the coarse pass on a smaller
-## catalogue, then re-run the winner on train_df.
-RUN_FINE_TUNE = False
+## 9. Fine tuning. Off by default because it retrains the model twice. 
+RUN_FINE_TUNE = True
 
 if RUN_FINE_TUNE:
-    coarse_train = subsample_catalogue(train_df)
-    coarse_val = subsample_catalogue(val_df)
-
-    results = fine_tune(coarse_train, coarse_val)
-    print(results[['name', 'p_at_1', 'p_at_5', 'p_at_10', 'map_at_10', 'active_fraction']])
+    tuning_table = fine_tune(subsample_catalogue(train_df),
+                             subsample_catalogue(val_df))
+    print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
+                        'map_at_10', 'active_fraction']])
