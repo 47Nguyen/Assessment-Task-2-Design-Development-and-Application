@@ -99,7 +99,7 @@ same-split model comparison.
 ### 1. Audit the data (optional)
 
 ```powershell
-python -m tasks.task3_gender_usage.data --output-dir outputs/task3/data_check_3
+python -m tasks.task3_gender_usage.data --output-dir outputs/task3/"name"
 ```
 
 This creates audit reports and `split_manifest.csv`; it does not train a model.
@@ -108,7 +108,7 @@ The folder must be new. If it already exists, choose another name.
 ### 2. Check the complete training pipeline quickly
 
 ```powershell
-python -m tasks.task3_gender_usage.train --smoke --run-dir outputs/task3/smoke_check_3
+python -m tasks.task3_gender_usage.train --smoke --run-dir outputs/task3/smoke_check
 ```
 
 Smoke mode uses a small subset and two epochs. It verifies execution only; do
@@ -119,7 +119,7 @@ short period with no new terminal output before the two-epoch training begins.
 ### 3. Train a new full run only when needed
 
 ```powershell
-python -m tasks.task3_gender_usage.train --run-dir outputs/task3/final_run_2
+python -m tasks.task3_gender_usage.train --run-dir outputs/task3/final_run
 ```
 
 Each run directory must be new because the program intentionally refuses to
@@ -148,7 +148,7 @@ Softmax scores are not calibrated guarantees of correctness.
 ### 5. Export predictions for all 5,829 test images
 
 ```powershell
-python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --output outputs/task3/final_run/styles_prediction_task3_check_2.csv
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --output outputs/task3/final_run/styles_prediction_task3.csv
 ```
 
 To preserve predictions already filled by teammates, pass their official-layout

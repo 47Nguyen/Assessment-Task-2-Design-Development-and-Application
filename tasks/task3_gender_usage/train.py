@@ -3,7 +3,6 @@ Task 3: Train image-only MLP models for gender and usage.
 
 HOW TO RUN (from the repository root):
     python -m tasks.task3_gender_usage.train --run-dir outputs/task3/final_run
-    python -m tasks.task3_gender_usage.train --smoke
 
 FLOW: audit data -> split -> train candidates -> select on validation ->
       evaluate the selected model on holdout -> save models and evidence.
