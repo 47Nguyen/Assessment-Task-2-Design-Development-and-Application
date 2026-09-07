@@ -1,6 +1,9 @@
 # Dataset (too large for git — download from Canvas, see README)
 A2_FashionDataset/
 
+.venv/
+outputs/task3/
+
 # Generated artefacts
 cache/
 # Python
