@@ -1,32 +1,28 @@
 import os
-import sys
+
+os.environ['MPLBACKEND'] = 'Agg'
+
+import warnings
+from pathlib import Path
+
+import joblib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
-import joblib
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import seaborn as sns
-from pathlib import Path
+import tensorflow as tf
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import f1_score, accuracy_score, balanced_accuracy_score, confusion_matrix
 from sklearn.utils.class_weight import compute_class_weight
-import tensorflow as tf
 from tensorflow.keras import layers, models, callbacks
 
-# ---------------------------------------------------------------------------
-# Architecture Decisions
-# - Use local directories instead of importing from src/ to keep script self-contained.
-# - Cache data as .npy arrays to speed up IO reading operations.
-# ---------------------------------------------------------------------------
 SEED = 42
 MODEL_DIR = Path("models")
 OUTPUT_DIR = Path("outputs")
 CACHE_DIR = Path("cache")
 
-# Ensure directories exist
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -34,24 +30,21 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 CSV_PATH = "A2_FashionDataset/FashionDataset/train/styles_train.csv"
 IMG_DIR = "A2_FashionDataset/FashionDataset/train/images_train"
 
-# ---------------------------------------------------------------------------
-# Utilities
-# ---------------------------------------------------------------------------
-def log_result(model_name, target, macro_f1, balanced_acc, accuracy):
-    """Log results to CSV file. Overwrite if model_name and target already exist."""
+def log_result(model_name, task_name, macro_f1, balanced_acc, accuracy, notes=""):
+    """Update a result row using the shared results.csv schema."""
     csv_file = OUTPUT_DIR / "results.csv"
     new_row = pd.DataFrame([{
-        "model": model_name,
-        "target": target,
+        "task": task_name,
+        "model_name": model_name,
         "macro_f1": macro_f1,
         "balanced_acc": balanced_acc,
-        "accuracy": accuracy
+        "accuracy": accuracy,
+        "notes": notes,
     }])
-    
+
     if csv_file.exists():
         df = pd.read_csv(csv_file)
-        # Remove old record for this model
-        df = df[~((df["target"] == target) & (df["model"] == model_name))]
+        df = df[~((df["task"] == task_name) & (df["model_name"] == model_name))]
         df = pd.concat([df, new_row], ignore_index=True)
     else:
         df = new_row
@@ -60,11 +53,10 @@ def log_result(model_name, target, macro_f1, balanced_acc, accuracy):
     print(f"[*] Updated results for {model_name} in {csv_file}")
 
 def plot_and_save_confusion_matrix(y_true, y_pred, classes, model_name):
-    """Plot and save Confusion Matrix."""
+    """Save a confusion matrix for one experiment."""
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(24, 24) if len(classes) > 50 else (12, 12))
     
-    # Hide labels if there are too many to prevent clutter
     if len(classes) > 50:
         sns.heatmap(cm, cmap='Blues', cbar=False, xticklabels=False, yticklabels=False)
         plt.title(f"Confusion Matrix: {model_name}\n(Labels hidden due to high cardinality)", fontsize=16)
@@ -83,10 +75,7 @@ def plot_and_save_confusion_matrix(y_true, y_pred, classes, model_name):
     print(f"[*] Saved confusion matrix to {out_path}")
 
 def build_reference_cnn(n_classes):
-    """
-    Standard CNN architecture required for Imbalance experiments.
-    Uses 3 basic Conv2D blocks + GlobalAveragePooling (prevents overfitting better than Flatten).
-    """
+    """Build the reference CNN for the imbalance experiments."""
     model = models.Sequential([
         layers.InputLayer(input_shape=(80, 60, 3)),
         
@@ -120,10 +109,7 @@ def build_reference_cnn(n_classes):
     return model
 
 def load_data(target_column="articleType"):
-    """
-    Load data, filter invalid images, and cache npy arrays.
-    Performs exact 80/20 split with SEED=42.
-    """
+    """Load and cache an 80/20 split for the requested target."""
     cache_prefix = CACHE_DIR / f"task1_{target_column}"
     paths = {
         "X_train": f"{cache_prefix}_X_train.npy",
@@ -147,19 +133,15 @@ def load_data(target_column="articleType"):
             raise FileNotFoundError(f"Cannot find {CSV_PATH}")
             
         df = pd.read_csv(CSV_PATH, on_bad_lines='skip')
-        df = df.iloc[:, :10] # Keep only first 10 columns like original code
-        
-        # Create image paths
+        df = df.iloc[:, :10]
+
         df['img_path'] = df['id'].apply(lambda x: os.path.join(IMG_DIR, f"{x}.jpg"))
-        
-        # Filter existing images
+
         valid_mask = df['img_path'].apply(os.path.exists)
         df = df[valid_mask].reset_index(drop=True)
-        
-        # Drop NaN values for target column
+
         df = df.dropna(subset=[target_column]).reset_index(drop=True)
-        
-        # Encode label
+
         le = LabelEncoder()
         df['label'] = le.fit_transform(df[target_column])
         joblib.dump(le, paths["encoder"])
@@ -187,7 +169,6 @@ def load_data(target_column="articleType"):
         np.save(paths["y_train"], y_train)
         np.save(paths["y_val"], y_val)
     
-    # Normalize to [0, 1] for CNN
     X_train = X_train.astype(np.float32) / 255.0
     X_val = X_val.astype(np.float32) / 255.0
     
@@ -198,13 +179,11 @@ def load_data(target_column="articleType"):
     return X_train, X_val, y_train, y_val, le
 
 def evaluate_and_log(model, X_val, y_val, le, model_name, target):
-    """Predict, compute F1 score, plot confusion matrix and save results."""
+    """Evaluate an experiment, save its result, and plot its confusion matrix."""
     print(f"\n--- Evaluating {model_name} ---")
     preds_prob = model.predict(X_val, verbose=0)
     preds = np.argmax(preds_prob, axis=1)
     
-    # Ensure no undefined metric warnings
-    import warnings
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         macro_f1 = f1_score(y_val, preds, average='macro')
@@ -216,9 +195,6 @@ def evaluate_and_log(model, X_val, y_val, le, model_name, target):
     log_result(model_name, target, macro_f1, bal_acc, acc)
     plot_and_save_confusion_matrix(y_val, preds, le.classes_, model_name)
 
-# ---------------------------------------------------------------------------
-# Experiment 1: Class Weights
-# ---------------------------------------------------------------------------
 def run_experiment_1():
     print("\n" + "="*50)
     print("EXPERIMENT 1: Class Weights (cnn_weighted)")
@@ -227,16 +203,14 @@ def run_experiment_1():
     X_train, X_val, y_train, y_val, le = load_data("articleType")
     classes = np.unique(y_train)
     
-    # Calculate weights
     weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train)
-    # Limit weight to 10.0 to prevent gradient explosion for very rare classes
     weights = np.clip(weights, 0, 10.0)
     class_weight_dict = dict(zip(classes, weights))
     
     n_classes = len(le.classes_)
     for i in range(n_classes):
         if i not in class_weight_dict:
-            class_weight_dict[i] = 10.0 # Default weight cap for missing classes
+            class_weight_dict[i] = 10.0
             
     print(f"[-] Filled missing class weights. Total keys: {len(class_weight_dict)}")
     
@@ -260,9 +234,6 @@ def run_experiment_1():
     
     evaluate_and_log(model, X_val, y_val, le, "cnn_weighted", "articleType")
 
-# ---------------------------------------------------------------------------
-# Experiment 2: Oversampling Rare Classes
-# ---------------------------------------------------------------------------
 def run_experiment_2():
     print("\n" + "="*50)
     print("EXPERIMENT 2: Oversampling (cnn_oversampled)")
@@ -270,7 +241,6 @@ def run_experiment_2():
     
     X_train, X_val, y_train, y_val, le = load_data("articleType")
     
-    # Find rare classes (< 100 samples)
     unique_classes, counts = np.unique(y_train, return_counts=True)
     rare_classes = unique_classes[counts < 100]
     
@@ -279,7 +249,6 @@ def run_experiment_2():
     X_extra = []
     y_extra = []
     
-    # Fix random seed for stable oversampling results
     rng = np.random.default_rng(SEED)
     
     for cls in rare_classes:
@@ -288,7 +257,6 @@ def run_experiment_2():
         needed = 100 - current_count
         
         if needed > 0 and current_count > 0:
-            # Random choice with replacement
             chosen_idx = rng.choice(cls_idx, size=needed, replace=True)
             X_extra.append(X_train[chosen_idx])
             y_extra.append(y_train[chosen_idx])
@@ -300,7 +268,6 @@ def run_experiment_2():
         X_train_os = X_train
         y_train_os = y_train
         
-    # Shuffle train set after concatenating
     shuffle_idx = rng.permutation(len(y_train_os))
     X_train_os = X_train_os[shuffle_idx]
     y_train_os = y_train_os[shuffle_idx]
@@ -325,15 +292,11 @@ def run_experiment_2():
     
     evaluate_and_log(model, X_val, y_val, le, "cnn_oversampled", "articleType")
 
-# ---------------------------------------------------------------------------
-# Experiment 3: Merging Rare Classes into subCategory
-# ---------------------------------------------------------------------------
 def run_experiment_3():
     print("\n" + "="*50)
     print("EXPERIMENT 3: Change Target to subCategory (cnn_merged)")
     print("="*50)
     
-    # Load data again but with target_column="subCategory"
     X_train, X_val, y_train, y_val, le = load_data("subCategory")
     
     model = build_reference_cnn(len(le.classes_))
@@ -354,9 +317,6 @@ def run_experiment_3():
     
     evaluate_and_log(model, X_val, y_val, le, "cnn_merged", "subCategory")
 
-# ---------------------------------------------------------------------------
-# Main Execution
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     print("Starting 3 Class Imbalance experiments (Member 2)...\n")
     run_experiment_1()
