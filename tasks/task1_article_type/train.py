@@ -305,6 +305,28 @@ def main():
     model.save("models/cnn_articleType.keras")
     print("CNN model successfully saved to: models/cnn_articleType.keras")
 
+    # generate predictions 
+    print("\nGenerating predictions on test set...")
+    test_dir = Path("A2_FashionDataset/FashionDataset/test/images_test")
+    image_paths = sorted(list(test_dir.glob("*.jpg")))
+
+    if image_paths:
+        ids = [p.stem for p in image_paths]
+        batch_images = []
+        for p in image_paths:
+            img = tf.keras.preprocessing.image.load_img(p, target_size=(80, 60))
+            batch_images.append(tf.keras.preprocessing.image.img_to_array(img))
+        
+        X_test_batch = np.array(batch_images, dtype=np.float32) / 255.0
+        preds = model.predict(X_test_batch, verbose=0)
+        pred_labels = label_encoder.inverse_transform(np.argmax(preds, axis=1))
+        
+        df_pred = pd.DataFrame({"id": ids, "predicted_articleType": pred_labels})
+        out_path = OUTPUT_DIR / "task1_predictions.csv"
+        df_pred.to_csv(out_path, index=False)
+        print(f"Successfully saved predictions to: {out_path}\n")
+
+
     if args.tune:
         print("\n--- Step 4: Running Hyperparameter Tuning (OFAAT) ---")
         
@@ -339,6 +361,9 @@ def main():
             run_tuning_experiment(dropout=d, run_name=f"cnn_dropout_{str(d).replace('.', '_')}")
             
         print("\nTuning Grid completed!")
+
+    
+
 
 if __name__ == "__main__":
     main()
