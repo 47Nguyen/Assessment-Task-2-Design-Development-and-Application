@@ -172,8 +172,8 @@ def evaluate_model(y_true, y_pred, task_name, model_name, notes=""):
     
     res_path = OUTPUT_DIR / "results.csv"
     row = {
-        "task": task_name,
-        "model_name": model_name,
+        "target": task_name,
+        "model": model_name,
         "macro_f1": macro_f1,
         "balanced_acc": balanced_acc,
         "accuracy": acc,

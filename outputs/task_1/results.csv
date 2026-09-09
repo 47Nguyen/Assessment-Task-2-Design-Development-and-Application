@@ -1,4 +1,4 @@
-task,model_name,macro_f1,balanced_acc,accuracy,notes
+target,model,macro_f1,balanced_acc,accuracy,notes
 articleType,majority_baseline,0.0028021978021978,0.0092592592592592,0.1782985886313608,Always predicts: Tshirts
 articleType,logistic_regression,0.298083059058823,0.2600656043674864,0.6364107212223229,SGDClassifier on HOG+ColorHist
 articleType,linear_svm,0.2869817158009226,0.25271201448155667,0.6291596529845915,SGDClassifier with hinge loss on HOG+ColorHist
