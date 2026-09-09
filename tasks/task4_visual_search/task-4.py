@@ -9,6 +9,7 @@ import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Activation, Flatten, MaxPooling2D, UnitNormalization, Dropout
 from sklearn.model_selection import train_test_split
+from sklearn.cluster import KMeans
 from pathlib import Path
 tf.get_logger().setLevel('ERROR')
 
@@ -26,6 +27,7 @@ tf.random.set_seed(42)
 # https://arxiv.org/abs/1703.07737
 # https://github.com/adambielski/siamese-triplet
 # https://github.com/13muskanp/Siamese-Network-with-Triplet-Loss
+# https://www.geeksforgeeks.org/machine-learning/elbow-method-for-optimal-value-of-k-in-kmeans/
 
 
 
@@ -50,7 +52,6 @@ target_shape = (80,60)
 
 
 # SECTION 2: Preprocessing
-
 def preprocess_image(filename):
     """
     Load the specified file as a JPEG image, preprocess it and
@@ -353,6 +354,8 @@ def triplet_diagnostics(model, dataset, margin):
     }
 
 
+
+# Needed helped with AI for this functions
 def train_tuned_model(model, train_df, val_df, config, verbose = True):
     """
     Train one configuration, keeping the weights from the best epoch rather
@@ -569,6 +572,93 @@ def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
     metrics['n_queries'] = len(queries)
     return metrics
 
+# SECTION 8b: Justifying the two numbers we picked by hand - K and the
+# structure of the embedding space. Both read saved artefacts, neither trains.
+def precision_at_k_curve(model, index, index_df, query_df, k_max = 20,
+                         n_queries = 500, seed = 42,
+                         save_to = 'outputs/task_4/pk_curve.csv'):
+    """
+    Precision@K for every K from 1 to k_max, so K = 5 is a choice we can point at.
+    """
+    queries = query_df.sample(n = min(n_queries, len(query_df)), random_state = seed)
+
+    query_embeddings = embed_paths(model, queries['path'].tolist())
+    distances = squared_distances(query_embeddings, index)
+
+    index_types = index_df['articleType'].to_numpy()
+    query_types = queries['articleType'].to_numpy()
+
+    ordering = np.argsort(distances, axis = 1)[:, :k_max]
+    relevant = index_types[ordering] == query_types[:, None]
+
+    # cumulative hits / rank gives P@K at every K in one pass
+    running = np.cumsum(relevant, axis = 1) / np.arange(1, k_max + 1)
+
+    curve = pd.DataFrame({'k': np.arange(1, k_max + 1),
+                          'precision_at_k': running.mean(axis = 0)})
+    # what the Kth slot adds on its own, which is where the flattening shows
+    curve['marginal_relevant'] = relevant.mean(axis = 0)
+
+    curve.to_csv(save_to, index = False)
+    return curve
+
+# Referred to the slide 
+def embedding_elbow(index, k_list = range(2, 41), sample = 5000, seed = 42,
+                    save_to = 'outputs/task_4/elbow.csv'):
+    """
+    Summed distance against k over the saved embeddings - the elbow method.
+
+    SD always falls as k rises, so it is read for the bend, not the minimum.
+    n_init = 10 because k-means only finds a local optimum from one start.
+    """
+    rng = np.random.RandomState(seed)
+    if len(index) > sample:
+        index = index[rng.choice(len(index), sample, replace = False)]
+
+    rows = []
+    for k in k_list:
+        km = KMeans(n_clusters = k, n_init = 10, random_state = seed).fit(index)
+        rows.append({'k': k, 'summed_distance': float(km.inertia_)})
+
+    elbow = pd.DataFrame(rows)
+    elbow.to_csv(save_to, index = False)
+    return elbow
+
+
+def cluster_purity(index, index_df, k = 30, sample = 5000, seed = 42,
+                   save_to = 'outputs/task_4/cluster_purity.csv'):
+    """
+    How often a cluster's members share the majority articleType.
+
+    Clustering never sees the labels, so agreement is evidence the distances
+    the search relies on carry real article type structure.
+    """
+    rng = np.random.RandomState(seed)
+    positions = np.arange(len(index))
+    if len(index) > sample:
+        positions = rng.choice(len(index), sample, replace = False)
+
+    embeddings = index[positions]
+    types = index_df['articleType'].to_numpy()[positions]
+
+    labels = KMeans(n_clusters = k, n_init = 10, random_state = seed).fit_predict(embeddings)
+
+    rows = []
+    for cluster in range(k):
+        members = types[labels == cluster]
+        if len(members) == 0:
+            continue
+        values, counts = np.unique(members, return_counts = True)
+        top = counts.argmax()
+        rows.append({'cluster': cluster, 'size': int(len(members)),
+                     'majority_type': values[top],
+                     'purity': float(counts[top] / len(members))})
+
+    purity = pd.DataFrame(rows)
+    purity.to_csv(save_to, index = False)
+    return purity
+
+
 # SECTION 9: Fine Tunning the model
 
 RESULTS_FILE = 'outputs/task_4/results_task4.csv'
@@ -630,6 +720,8 @@ def run_experiment(config, train_df, val_df, n_queries = 500):
     return model, row, history, index
 
 
+
+# Needed AI help for this function
 def fine_tune(train_df, val_df, n_queries = 500):
     """
     Run both configurations and save the better one by mAP@10.
@@ -664,7 +756,7 @@ def fine_tune(train_df, val_df, n_queries = 500):
     table.to_csv(RESULTS_FILE, index = False)
     return table
 
-
+# 
 def subsample_catalogue(df, n_types = 30):
     """
     A smaller catalogue for a quicker comparison, so a run takes minutes
@@ -682,6 +774,9 @@ def subsample_catalogue(df, n_types = 30):
 
 RUN_FINE_TUNE = False
 RUN_FINALISE = False
+# The K curve and the elbow. Read only - they never touch the saved model,
+# the index or any number already in results_task4.csv.
+RUN_ANALYSIS = False
 
 
 # SECTION 11: Running pipeline with functions swetup
@@ -753,3 +848,16 @@ if RUN_FINALISE:
 
     print(f"tuned precision@5 on the full catalogue: {tuned_precision:.3f}")
     print(tuned_results[['id', 'articleType', 'baseColour', 'masterCategory']])
+
+
+# 9. Justification analysis - why K = 5, and evidence the embedding space is
+#    structured. Off by default because it re-embeds the validation queries.
+if RUN_ANALYSIS:
+    curve = precision_at_k_curve(model, index, train_df, val_df)
+    print(curve.to_string(index = False))
+
+    elbow = embedding_elbow(index)
+    print(elbow.to_string(index = False))
+
+    purity = cluster_purity(index, train_df)
+    print(f"mean cluster purity at k=30: {purity['purity'].mean():.3f}")
