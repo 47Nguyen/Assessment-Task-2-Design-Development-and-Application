@@ -34,8 +34,8 @@ def log_result(model_name, task_name, macro_f1, balanced_acc, accuracy, notes=""
     """Update a result row using the shared results.csv schema."""
     csv_file = OUTPUT_DIR / "results.csv"
     new_row = pd.DataFrame([{
-        "task": task_name,
-        "model_name": model_name,
+        "target": task_name,
+        "model": model_name,
         "macro_f1": macro_f1,
         "balanced_acc": balanced_acc,
         "accuracy": accuracy,
@@ -44,7 +44,7 @@ def log_result(model_name, task_name, macro_f1, balanced_acc, accuracy, notes=""
 
     if csv_file.exists():
         df = pd.read_csv(csv_file)
-        df = df[~((df["task"] == task_name) & (df["model_name"] == model_name))]
+        df = df[~((df["target"] == task_name) & (df["model"] == model_name))]
         df = pd.concat([df, new_row], ignore_index=True)
     else:
         df = new_row
