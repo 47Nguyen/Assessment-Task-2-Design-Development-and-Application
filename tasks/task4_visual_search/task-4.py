@@ -569,7 +569,7 @@ def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
     metrics['n_queries'] = len(queries)
     return metrics
 
-# SECTION 8b: Justifying the two numbers we picked by hand - K and the tructure of the embedding space. Both read saved artefacts, neither trains.
+# SECTION 8b: Justifying the two numbers we picked by hand 
 def precision_at_k_curve(model, index, index_df, query_df, k_max = 20,
                          n_queries = 500, seed = 42,
                          save_to = 'outputs/task_4/pk_curve.csv'):
@@ -598,14 +598,9 @@ def precision_at_k_curve(model, index, index_df, query_df, k_max = 20,
     curve.to_csv(save_to, index = False)
     return curve
 
-# Referred to the slide - output the elbow method for slides
+# Elbmow method to find the correct value of K
 def embedding_elbow(index, k_list = range(2, 41), sample = 5000, seed = 42, save_to = 'outputs/task_4/elbow.csv'):
-    """
-    Summed distance against k over the saved embeddings - the elbow method.
 
-    SD always falls as k rises, so it is read for the bend, not the minimum.
-    n_init = 10 because k-means only finds a local optimum from one start.
-    """
     rng = np.random.RandomState(seed)
     if len(index) > sample:
         index = index[rng.choice(len(index), sample, replace = False)]
@@ -765,7 +760,7 @@ def subsample_catalogue(df, n_types = 30):
 RUN_FINE_TUNE = False
 RUN_FINALISE = True
 # The K curve and the elbow. Read only - they never touch the saved model, the index or any number already in results_task4.csv.
-RUN_ANALYSIS = True
+RUN_ANALYSIS = False
 
 
 # SECTION 11: Running pipeline with functions swetup
