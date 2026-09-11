@@ -1,6 +1,15 @@
 # Dataset (too large for git — download from Canvas, see README)
 A2_FashionDataset/
 
+# Virtual environments
+.venv/
+outputs/task3/
+
+# Keep only task4_topk_predictions.csv in outputs/task_4/
+outputs/task_4/*
+!outputs/task_4/task4_topk_predictions.csv
+
+
 # Generated artefacts
 cache/
 # Python
@@ -10,6 +19,7 @@ __pycache__/
 
 # Notebooks
 .ipynb_checkpoints/
+task3.ipynb
 
 # OS
 .DS_Store
@@ -19,3 +29,4 @@ desktop.ini
 # Editors
 .vscode/
 .idea/
+venv/
