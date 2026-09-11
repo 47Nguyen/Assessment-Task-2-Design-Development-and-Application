@@ -51,7 +51,7 @@ python -m tasks.task2_season.predict
 
 ```bash
 python -m tasks.task3_gender_usage.train
-python -m tasks.task3_gender_usage.predict --models-dir outputs/task_3/models --output outputs/task_3/styles_prediction_task3.csv
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --export
 ```
 
 **Task 4 — Visual search**
@@ -59,6 +59,12 @@ python -m tasks.task3_gender_usage.predict --models-dir outputs/task_3/models --
 ```bash
 python tasks/task4_visual_search/task-4.py
 ```
+
+Tasks 1–3 all write into the same shared submission file,
+`outputs/COSC253_A2_SG_G9.csv`, each filling in only its own column
+(`articleType`, `season`, or `gender`/`usage`). Run them in any order — each
+run updates the file in place without touching the other tasks' columns.
+Task 4's output is separate: `outputs/task_4/task4_topk_predictions_tuned.csv`.
 
 Each task's folder under `tasks/` has its own README with more detail if you
 get stuck.

@@ -19,7 +19,9 @@ import pandas as pd
 from PIL import Image
 from skimage.color import rgb2gray
 from skimage.feature import hog
- 
+
+from tasks._submission import update_submission
+
 ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_ROOT = ROOT / "A2_FashionDataset" / "FashionDataset"
 TEST_CSV = DATA_ROOT / "test" / "styles_prediction.csv"
@@ -140,11 +142,7 @@ def main():
     print("\nPredicted season distribution:")
     print(pd.Series(season_labels).value_counts())
  
-    result = pd.DataFrame({"id": ids, "season": season_labels})
-    output_csv = OUTPUT_DIR / f"task2_season_predictions_{args.model}.csv"
-    result.to_csv(output_csv, index=False)
-    print(f"\nSaved predictions to {output_csv}")
-    print("(id, season only - merge this into the shared submission file separately)")
+    update_submission(ids, {"season": season_labels})
  
 if __name__ == "__main__":
     main()

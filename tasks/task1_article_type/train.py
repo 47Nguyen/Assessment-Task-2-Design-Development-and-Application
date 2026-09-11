@@ -15,6 +15,8 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from tensorflow.keras import layers, models
 from tqdm import tqdm
 
+from tasks._submission import update_submission
+
 SEED = 42
 MODEL_DIR = Path("models")
 OUTPUT_DIR = Path("outputs")
@@ -321,10 +323,7 @@ def main():
         preds = model.predict(X_test_batch, verbose=0)
         pred_labels = label_encoder.inverse_transform(np.argmax(preds, axis=1))
         
-        df_pred = pd.DataFrame({"id": ids, "predicted_articleType": pred_labels})
-        out_path = OUTPUT_DIR / "task1_predictions.csv"
-        df_pred.to_csv(out_path, index=False)
-        print(f"Successfully saved predictions to: {out_path}\n")
+        update_submission(ids, {"articleType": pred_labels})
 
 
     if args.tune:

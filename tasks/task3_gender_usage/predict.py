@@ -3,10 +3,11 @@ Task 3: Reload the trained MLPs to predict gender and usage.
 
 HOW TO RUN (from the project root, after running train.py):
     python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --image A2_FashionDataset/FashionDataset/test/images_test/52003.jpg
-    python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --output outputs/task3/final_run/styles_prediction_task3.csv
+    python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --export
 
 Use the models folder from your actual run. Prediction does NOT train again.
-CSV export fills only gender and usage; other tasks' columns stay unchanged.
+--export fills only gender and usage in outputs/COSC253_A2_SG_G9.csv;
+other tasks' columns stay unchanged.
 """
 
 # ---------------------------------------------------------------------------
@@ -25,6 +26,7 @@ import pandas as pd
 import tensorflow as tf
 
 from .data import TARGETS, find_root, prepare_image
+from tasks._submission import update_submission
 
 
 # ---------------------------------------------------------------------------
@@ -143,55 +145,29 @@ class Task3Predictor:
 
 
 # ---------------------------------------------------------------------------
-# 4. Export test predictions without overwriting the source or teammates' work
+# 4. Export test predictions into the shared submission file
 # ---------------------------------------------------------------------------
-def export_submission(repo_root, models_dir, destination, template_path=None):
-    """Write a NEW official-layout CSV, changing only gender and usage."""
+def export_submission(repo_root, models_dir):
+    """Fill gender and usage for every test image in the shared submission file."""
     root = find_root(repo_root)
     dataset = root / "A2_FashionDataset/FashionDataset"
     official_path = dataset / "test/styles_prediction.csv"
-    source = Path(template_path).resolve() if template_path else official_path
-    destination = Path(destination).resolve()
-    if destination == source.resolve() or destination.exists():
-        raise FileExistsError(
-            "Choose a new output CSV; source files and existing predictions "
-            "are never overwritten."
-        )
-
-    template = pd.read_csv(source)
-    official = pd.read_csv(official_path)
-    if (
-        list(template.columns) != list(official.columns)
-        or not template["id"].equals(official["id"])
-    ):
-        raise ValueError(
-            "Submission template must preserve the official columns and ID order."
-        )
+    official = pd.read_csv(official_path, dtype={"id": str})
 
     predictor = Task3Predictor(models_dir)
     paths = [
         dataset / "test/images_test" / f"{identity}.jpg"
-        for identity in template["id"]
+        for identity in official["id"]
     ]
     scores = predictor.predict_paths(paths)
 
-    result = template.copy()
+    columns = {}
     for target in TARGETS:
         classes = np.asarray(predictor.specifications[target]["classes"])
         predicted_indices = scores[target].argmax(axis=1)
-        result[target] = classes[predicted_indices]
+        columns[target] = classes[predicted_indices]
 
-    untouched_columns = [column for column in template if column not in TARGETS]
-    pd.testing.assert_frame_equal(
-        template[untouched_columns], result[untouched_columns]
-    )
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    result.to_csv(destination, index=False)
-    print(
-        f"Saved {len(result)} rows to {destination}. "
-        "Only gender and usage are filled by Task 3."
-    )
-    return result
+    update_submission(official["id"], columns)
 
 
 # ---------------------------------------------------------------------------
@@ -254,16 +230,12 @@ def parse_args():
     )
     action = parser.add_mutually_exclusive_group(required=True)
     action.add_argument("--image", type=Path, help="Predict one image.")
-    action.add_argument("--output", type=Path, help="Export test labels to a NEW CSV.")
-    parser.add_argument("--repo-root", type=Path, help="Extracted repository root.")
-    parser.add_argument(
-        "--template", type=Path,
-        help="Optional official-layout CSV already containing other tasks' results.",
+    action.add_argument(
+        "--export", action="store_true",
+        help="Fill gender and usage for every test image in outputs/COSC253_A2_SG_G9.csv.",
     )
-    args = parser.parse_args()
-    if args.template and not args.output:
-        parser.error("--template is used with --output, not with --image.")
-    return args
+    parser.add_argument("--repo-root", type=Path, help="Extracted repository root.")
+    return parser.parse_args()
 
 
 def main():
@@ -273,9 +245,7 @@ def main():
         prediction = predictor.predict_image(args.image)
         print(json.dumps(prediction, indent=2))
     else:
-        export_submission(
-            args.repo_root, args.models_dir, args.output, args.template
-        )
+        export_submission(args.repo_root, args.models_dir)
 
 
 if __name__ == "__main__":

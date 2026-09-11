@@ -429,9 +429,13 @@ def train_and_evaluate_rf(
     notes = (f"n_estimators={n_estimators}, max_depth={max_depth}, "
              f"weights={'balanced' if use_class_weights else 'none'}")
     eval_row = evaluate_model(y_val, y_pred, TARGET_VALUE, model_name, notes=notes)
- 
-    plot_confusion(y_val, y_pred, label_encoder, TARGET_VALUE, save_name)
- 
+
+    if save_best_model:
+        # only plot the confusion matrix for a run that's actually being kept
+        # (the base run or the final winning --tune config) - not for every
+        # one of the intermediate tuning-grid attempts
+        plot_confusion(y_val, y_pred, label_encoder, TARGET_VALUE, save_name)
+
     print("\n--- Per-class results ---")
     print(per_class_report(y_val, y_pred, label_encoder).round(3))
  
