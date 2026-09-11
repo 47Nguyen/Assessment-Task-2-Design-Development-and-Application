@@ -5,9 +5,16 @@ A2_FashionDataset/
 .venv/
 outputs/task3/
 
+outputs/task_1/*.png
+outputs/task_1/results.csv
+
+outputs/task_2/*.png
+outputs/task_2/results.csv
+outputs/task_2/task2_season_predictions_base.csv
+
 # Keep only task4_topk_predictions.csv in outputs/task_4/
 outputs/task_4/*
-!outputs/task_4/task4_topk_predictions.csv
+outputs/task_4/task4_topk_predictions_tuned.csv
 
 
 # Generated artefacts

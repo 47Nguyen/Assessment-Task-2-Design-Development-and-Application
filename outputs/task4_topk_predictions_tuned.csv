@@ -1,0 +1,501 @@
+query_id,query_articleType,query_path,rank,retrieved_id,retrieved_articleType,retrieved_path,distance
+42656,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42656.jpg,1,40630,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/40630.jpg,0.010775436
+42656,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42656.jpg,2,31310,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/31310.jpg,0.013042105
+42656,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42656.jpg,3,31065,Dupatta,./A2_FashionDataset/FashionDataset/train/images_train/31065.jpg,0.014965712
+42656,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42656.jpg,4,18263,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/18263.jpg,0.028308779
+42656,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42656.jpg,5,28475,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28475.jpg,0.029355908
+25000,Capris,./A2_FashionDataset/FashionDataset/train/images_train/25000.jpg,1,32427,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/32427.jpg,0.007816051
+25000,Capris,./A2_FashionDataset/FashionDataset/train/images_train/25000.jpg,2,40070,Capris,./A2_FashionDataset/FashionDataset/train/images_train/40070.jpg,0.013719659
+25000,Capris,./A2_FashionDataset/FashionDataset/train/images_train/25000.jpg,3,27415,Capris,./A2_FashionDataset/FashionDataset/train/images_train/27415.jpg,0.017831262
+25000,Capris,./A2_FashionDataset/FashionDataset/train/images_train/25000.jpg,4,28463,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/28463.jpg,0.02074736
+25000,Capris,./A2_FashionDataset/FashionDataset/train/images_train/25000.jpg,5,5457,Track Pants,./A2_FashionDataset/FashionDataset/train/images_train/5457.jpg,0.020914905
+24523,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/24523.jpg,1,47025,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/47025.jpg,0.018009782
+24523,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/24523.jpg,2,42546,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42546.jpg,0.018491855
+24523,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/24523.jpg,3,42518,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42518.jpg,0.018836731
+24523,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/24523.jpg,4,24504,Belts,./A2_FashionDataset/FashionDataset/train/images_train/24504.jpg,0.020080753
+24523,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/24523.jpg,5,22070,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22070.jpg,0.022139896
+29906,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29906.jpg,1,16777,Watches,./A2_FashionDataset/FashionDataset/train/images_train/16777.jpg,0.102691814
+29906,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29906.jpg,2,46775,Perfume and Body Mist,./A2_FashionDataset/FashionDataset/train/images_train/46775.jpg,0.19883102
+29906,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29906.jpg,3,44037,Perfume and Body Mist,./A2_FashionDataset/FashionDataset/train/images_train/44037.jpg,0.27142793
+29906,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29906.jpg,4,48981,Ring,./A2_FashionDataset/FashionDataset/train/images_train/48981.jpg,0.30423254
+29906,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29906.jpg,5,43155,Watches,./A2_FashionDataset/FashionDataset/train/images_train/43155.jpg,0.32250553
+24172,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/24172.jpg,1,44691,Tops,./A2_FashionDataset/FashionDataset/train/images_train/44691.jpg,0.02055025
+24172,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/24172.jpg,2,27272,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/27272.jpg,0.026507208
+24172,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/24172.jpg,3,33038,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/33038.jpg,0.026614437
+24172,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/24172.jpg,4,49651,Tops,./A2_FashionDataset/FashionDataset/train/images_train/49651.jpg,0.026641035
+24172,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/24172.jpg,5,43527,Tops,./A2_FashionDataset/FashionDataset/train/images_train/43527.jpg,0.027848065
+3066,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3066.jpg,1,3723,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3723.jpg,0.18260658
+3066,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3066.jpg,2,30475,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30475.jpg,0.25513434
+3066,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3066.jpg,3,51049,Bra,./A2_FashionDataset/FashionDataset/train/images_train/51049.jpg,0.2916137
+3066,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3066.jpg,4,26305,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26305.jpg,0.29573414
+3066,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3066.jpg,5,22611,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/22611.jpg,0.3133072
+7796,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7796.jpg,1,8803,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8803.jpg,0.034257896
+7796,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7796.jpg,2,30793,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/30793.jpg,0.04412888
+7796,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7796.jpg,3,7051,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/7051.jpg,0.045391046
+7796,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7796.jpg,4,46239,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/46239.jpg,0.05316888
+7796,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7796.jpg,5,17626,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/17626.jpg,0.055876687
+15742,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15742.jpg,1,8963,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/8963.jpg,0.014640778
+15742,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15742.jpg,2,22953,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22953.jpg,0.01986698
+15742,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15742.jpg,3,8530,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/8530.jpg,0.02239632
+15742,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15742.jpg,4,7735,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/7735.jpg,0.027947132
+15742,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15742.jpg,5,8984,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/8984.jpg,0.030726649
+17073,Belts,./A2_FashionDataset/FashionDataset/train/images_train/17073.jpg,1,27803,Belts,./A2_FashionDataset/FashionDataset/train/images_train/27803.jpg,0.013463354
+17073,Belts,./A2_FashionDataset/FashionDataset/train/images_train/17073.jpg,2,25109,Belts,./A2_FashionDataset/FashionDataset/train/images_train/25109.jpg,0.020542786
+17073,Belts,./A2_FashionDataset/FashionDataset/train/images_train/17073.jpg,3,38488,Belts,./A2_FashionDataset/FashionDataset/train/images_train/38488.jpg,0.021573808
+17073,Belts,./A2_FashionDataset/FashionDataset/train/images_train/17073.jpg,4,15941,Belts,./A2_FashionDataset/FashionDataset/train/images_train/15941.jpg,0.024300244
+17073,Belts,./A2_FashionDataset/FashionDataset/train/images_train/17073.jpg,5,38386,Belts,./A2_FashionDataset/FashionDataset/train/images_train/38386.jpg,0.024411876
+38037,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38037.jpg,1,10236,Watches,./A2_FashionDataset/FashionDataset/train/images_train/10236.jpg,0.024622303
+38037,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38037.jpg,2,11653,Watches,./A2_FashionDataset/FashionDataset/train/images_train/11653.jpg,0.025928989
+38037,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38037.jpg,3,31813,Watches,./A2_FashionDataset/FashionDataset/train/images_train/31813.jpg,0.037757494
+38037,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38037.jpg,4,46423,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46423.jpg,0.043043323
+38037,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38037.jpg,5,13053,Watches,./A2_FashionDataset/FashionDataset/train/images_train/13053.jpg,0.046456628
+51601,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/51601.jpg,1,50948,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/50948.jpg,0.0060373293
+51601,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/51601.jpg,2,11301,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/11301.jpg,0.03175613
+51601,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/51601.jpg,3,24848,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/24848.jpg,0.0347905
+51601,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/51601.jpg,4,28817,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/28817.jpg,0.038706943
+51601,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/51601.jpg,5,51585,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/51585.jpg,0.03974886
+37657,Socks,./A2_FashionDataset/FashionDataset/train/images_train/37657.jpg,1,29115,Socks,./A2_FashionDataset/FashionDataset/train/images_train/29115.jpg,0.13261315
+37657,Socks,./A2_FashionDataset/FashionDataset/train/images_train/37657.jpg,2,19499,Socks,./A2_FashionDataset/FashionDataset/train/images_train/19499.jpg,0.28024092
+37657,Socks,./A2_FashionDataset/FashionDataset/train/images_train/37657.jpg,3,32037,Socks,./A2_FashionDataset/FashionDataset/train/images_train/32037.jpg,0.30356756
+37657,Socks,./A2_FashionDataset/FashionDataset/train/images_train/37657.jpg,4,46134,Necklace and Chains,./A2_FashionDataset/FashionDataset/train/images_train/46134.jpg,0.3055304
+37657,Socks,./A2_FashionDataset/FashionDataset/train/images_train/37657.jpg,5,43827,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/43827.jpg,0.33344787
+24072,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24072.jpg,1,11823,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11823.jpg,0.12952727
+24072,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24072.jpg,2,13358,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13358.jpg,0.13271883
+24072,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24072.jpg,3,35463,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/35463.jpg,0.13453479
+24072,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24072.jpg,4,43478,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/43478.jpg,0.13972043
+24072,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24072.jpg,5,22848,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22848.jpg,0.14301343
+28757,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28757.jpg,1,24506,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/24506.jpg,0.0031788289
+28757,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28757.jpg,2,27090,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/27090.jpg,0.005338942
+28757,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28757.jpg,3,42556,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/42556.jpg,0.0063274046
+28757,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28757.jpg,4,19095,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/19095.jpg,0.007576986
+28757,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28757.jpg,5,11591,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/11591.jpg,0.007718971
+29977,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29977.jpg,1,43166,Watches,./A2_FashionDataset/FashionDataset/train/images_train/43166.jpg,0.019316249
+29977,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29977.jpg,2,11222,Watches,./A2_FashionDataset/FashionDataset/train/images_train/11222.jpg,0.027802113
+29977,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29977.jpg,3,45886,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45886.jpg,0.02876641
+29977,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29977.jpg,4,45268,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45268.jpg,0.0473721
+29977,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29977.jpg,5,50390,Watches,./A2_FashionDataset/FashionDataset/train/images_train/50390.jpg,0.049179755
+40126,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/40126.jpg,1,41994,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/41994.jpg,1.5859926e-14
+40126,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/40126.jpg,2,6974,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/6974.jpg,0.2506233
+40126,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/40126.jpg,3,38818,Tops,./A2_FashionDataset/FashionDataset/train/images_train/38818.jpg,0.25348395
+40126,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/40126.jpg,4,12844,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/12844.jpg,0.2619741
+40126,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/40126.jpg,5,11415,Tops,./A2_FashionDataset/FashionDataset/train/images_train/11415.jpg,0.27540693
+42001,Capris,./A2_FashionDataset/FashionDataset/train/images_train/42001.jpg,1,42002,Capris,./A2_FashionDataset/FashionDataset/train/images_train/42002.jpg,4.4214744e-14
+42001,Capris,./A2_FashionDataset/FashionDataset/train/images_train/42001.jpg,2,40145,Capris,./A2_FashionDataset/FashionDataset/train/images_train/40145.jpg,4.4214744e-14
+42001,Capris,./A2_FashionDataset/FashionDataset/train/images_train/42001.jpg,3,42267,Trousers,./A2_FashionDataset/FashionDataset/train/images_train/42267.jpg,0.06319817
+42001,Capris,./A2_FashionDataset/FashionDataset/train/images_train/42001.jpg,4,42595,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/42595.jpg,0.098063916
+42001,Capris,./A2_FashionDataset/FashionDataset/train/images_train/42001.jpg,5,38932,Leggings,./A2_FashionDataset/FashionDataset/train/images_train/38932.jpg,0.13956979
+48617,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48617.jpg,1,48662,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48662.jpg,0.15133612
+48617,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48617.jpg,2,35309,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/35309.jpg,0.24328655
+48617,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48617.jpg,3,4039,Caps,./A2_FashionDataset/FashionDataset/train/images_train/4039.jpg,0.24836959
+48617,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48617.jpg,4,48667,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48667.jpg,0.25210202
+48617,Earrings,./A2_FashionDataset/FashionDataset/train/images_train/48617.jpg,5,30097,Watches,./A2_FashionDataset/FashionDataset/train/images_train/30097.jpg,0.30363414
+38835,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/38835.jpg,1,11756,Tops,./A2_FashionDataset/FashionDataset/train/images_train/11756.jpg,0.087956786
+38835,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/38835.jpg,2,33209,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/33209.jpg,0.10129834
+38835,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/38835.jpg,3,19587,Tops,./A2_FashionDataset/FashionDataset/train/images_train/19587.jpg,0.107739925
+38835,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/38835.jpg,4,23053,Tops,./A2_FashionDataset/FashionDataset/train/images_train/23053.jpg,0.10799737
+38835,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/38835.jpg,5,9155,Tops,./A2_FashionDataset/FashionDataset/train/images_train/9155.jpg,0.11540154
+11898,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11898.jpg,1,10274,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10274.jpg,0.009024224
+11898,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11898.jpg,2,44419,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/44419.jpg,0.013393084
+11898,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11898.jpg,3,21099,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/21099.jpg,0.013707494
+11898,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11898.jpg,4,45596,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/45596.jpg,0.015447759
+11898,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11898.jpg,5,10151,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10151.jpg,0.015475729
+51966,Nightdress,./A2_FashionDataset/FashionDataset/train/images_train/51966.jpg,1,35467,Heels,./A2_FashionDataset/FashionDataset/train/images_train/35467.jpg,0.18662146
+51966,Nightdress,./A2_FashionDataset/FashionDataset/train/images_train/51966.jpg,2,45089,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45089.jpg,0.1997963
+51966,Nightdress,./A2_FashionDataset/FashionDataset/train/images_train/51966.jpg,3,45080,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45080.jpg,0.2241768
+51966,Nightdress,./A2_FashionDataset/FashionDataset/train/images_train/51966.jpg,4,51835,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/51835.jpg,0.24536237
+51966,Nightdress,./A2_FashionDataset/FashionDataset/train/images_train/51966.jpg,5,3345,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3345.jpg,0.27271995
+32728,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32728.jpg,1,16997,Flats,./A2_FashionDataset/FashionDataset/train/images_train/16997.jpg,0.09762016
+32728,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32728.jpg,2,43950,Flats,./A2_FashionDataset/FashionDataset/train/images_train/43950.jpg,0.11775332
+32728,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32728.jpg,3,3250,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3250.jpg,0.1985971
+32728,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32728.jpg,4,10613,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10613.jpg,0.20620742
+32728,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32728.jpg,5,5568,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5568.jpg,0.22547716
+28645,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/28645.jpg,1,2934,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/2934.jpg,0.007896127
+28645,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/28645.jpg,2,4415,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4415.jpg,0.011233697
+28645,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/28645.jpg,3,4053,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4053.jpg,0.011625956
+28645,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/28645.jpg,4,4382,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4382.jpg,0.014673866
+28645,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/28645.jpg,5,9866,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/9866.jpg,0.017480005
+30303,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/30303.jpg,1,44843,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/44843.jpg,0.0018483774
+30303,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/30303.jpg,2,14656,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/14656.jpg,0.0020709643
+30303,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/30303.jpg,3,10879,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10879.jpg,0.002158666
+30303,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/30303.jpg,4,5827,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/5827.jpg,0.002350071
+30303,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/30303.jpg,5,7281,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7281.jpg,0.0025127667
+39947,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39947.jpg,1,45608,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/45608.jpg,0.008404342
+39947,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39947.jpg,2,10153,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10153.jpg,0.010954568
+39947,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39947.jpg,3,12513,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/12513.jpg,0.017107438
+39947,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39947.jpg,4,10101,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10101.jpg,0.017446958
+39947,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39947.jpg,5,10145,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10145.jpg,0.017860029
+8471,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8471.jpg,1,17187,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17187.jpg,0.08824594
+8471,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8471.jpg,2,6054,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/6054.jpg,0.10986549
+8471,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8471.jpg,3,29276,Tops,./A2_FashionDataset/FashionDataset/train/images_train/29276.jpg,0.124572024
+8471,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8471.jpg,4,21162,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/21162.jpg,0.13430013
+8471,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8471.jpg,5,34104,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/34104.jpg,0.14829925
+5329,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5329.jpg,1,21727,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/21727.jpg,0.009515767
+5329,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5329.jpg,2,9401,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/9401.jpg,0.024767665
+5329,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5329.jpg,3,7843,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/7843.jpg,0.025125002
+5329,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5329.jpg,4,25486,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/25486.jpg,0.026025575
+5329,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5329.jpg,5,4490,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/4490.jpg,0.026199166
+48768,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48768.jpg,1,48767,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48767.jpg,0.0955011
+48768,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48768.jpg,2,48764,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48764.jpg,0.21369618
+48768,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48768.jpg,3,4945,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4945.jpg,0.32754606
+48768,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48768.jpg,4,40149,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/40149.jpg,0.33240238
+48768,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48768.jpg,5,48765,Jewellery Set,./A2_FashionDataset/FashionDataset/train/images_train/48765.jpg,0.34166422
+35810,Heels,./A2_FashionDataset/FashionDataset/train/images_train/35810.jpg,1,37968,Heels,./A2_FashionDataset/FashionDataset/train/images_train/37968.jpg,0.024476904
+35810,Heels,./A2_FashionDataset/FashionDataset/train/images_train/35810.jpg,2,47549,Heels,./A2_FashionDataset/FashionDataset/train/images_train/47549.jpg,0.02958893
+35810,Heels,./A2_FashionDataset/FashionDataset/train/images_train/35810.jpg,3,46612,Heels,./A2_FashionDataset/FashionDataset/train/images_train/46612.jpg,0.031080194
+35810,Heels,./A2_FashionDataset/FashionDataset/train/images_train/35810.jpg,4,42700,Flats,./A2_FashionDataset/FashionDataset/train/images_train/42700.jpg,0.03189248
+35810,Heels,./A2_FashionDataset/FashionDataset/train/images_train/35810.jpg,5,46604,Heels,./A2_FashionDataset/FashionDataset/train/images_train/46604.jpg,0.033120655
+51518,Watches,./A2_FashionDataset/FashionDataset/train/images_train/51518.jpg,1,49895,Watches,./A2_FashionDataset/FashionDataset/train/images_train/49895.jpg,0.023609057
+51518,Watches,./A2_FashionDataset/FashionDataset/train/images_train/51518.jpg,2,22944,Watches,./A2_FashionDataset/FashionDataset/train/images_train/22944.jpg,0.024604756
+51518,Watches,./A2_FashionDataset/FashionDataset/train/images_train/51518.jpg,3,17448,Watches,./A2_FashionDataset/FashionDataset/train/images_train/17448.jpg,0.031394165
+51518,Watches,./A2_FashionDataset/FashionDataset/train/images_train/51518.jpg,4,22943,Watches,./A2_FashionDataset/FashionDataset/train/images_train/22943.jpg,0.036001697
+51518,Watches,./A2_FashionDataset/FashionDataset/train/images_train/51518.jpg,5,36903,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36903.jpg,0.037959374
+48442,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/48442.jpg,1,6765,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6765.jpg,0.05808501
+48442,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/48442.jpg,2,4986,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4986.jpg,0.07012129
+48442,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/48442.jpg,3,4767,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4767.jpg,0.07858424
+48442,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/48442.jpg,4,44855,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/44855.jpg,0.08236896
+48442,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/48442.jpg,5,26470,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26470.jpg,0.0846388
+10172,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10172.jpg,1,9032,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/9032.jpg,0.02775556
+10172,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10172.jpg,2,20825,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/20825.jpg,0.040225342
+10172,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10172.jpg,3,24727,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24727.jpg,0.041383762
+10172,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10172.jpg,4,17668,Flats,./A2_FashionDataset/FashionDataset/train/images_train/17668.jpg,0.0473916
+10172,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/10172.jpg,5,4078,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/4078.jpg,0.047959924
+38439,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/38439.jpg,1,36051,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/36051.jpg,0.0047433744
+38439,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/38439.jpg,2,10321,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/10321.jpg,0.0138664795
+38439,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/38439.jpg,3,36052,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/36052.jpg,0.020438785
+38439,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/38439.jpg,4,16768,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/16768.jpg,0.025025312
+38439,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/38439.jpg,5,47927,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/47927.jpg,0.025094287
+20583,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/20583.jpg,1,12416,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/12416.jpg,0.05392138
+20583,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/20583.jpg,2,20481,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/20481.jpg,0.055032596
+20583,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/20583.jpg,3,25307,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/25307.jpg,0.056440864
+20583,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/20583.jpg,4,24617,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/24617.jpg,0.05689112
+20583,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/20583.jpg,5,14860,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/14860.jpg,0.0589718
+44721,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44721.jpg,1,22502,Heels,./A2_FashionDataset/FashionDataset/train/images_train/22502.jpg,0.024341514
+44721,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44721.jpg,2,44188,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44188.jpg,0.03557146
+44721,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44721.jpg,3,21470,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/21470.jpg,0.03836585
+44721,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44721.jpg,4,41944,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/41944.jpg,0.042493924
+44721,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44721.jpg,5,47089,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/47089.jpg,0.04473953
+16161,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/16161.jpg,1,45576,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/45576.jpg,0.002710127
+16161,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/16161.jpg,2,2640,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2640.jpg,0.0044150604
+16161,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/16161.jpg,3,2638,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2638.jpg,0.0044150604
+16161,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/16161.jpg,4,11909,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11909.jpg,0.005259284
+16161,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/16161.jpg,5,9699,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/9699.jpg,0.0053601274
+13702,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13702.jpg,1,13381,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13381.jpg,0.0025348505
+13702,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13702.jpg,2,22978,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22978.jpg,0.012667811
+13702,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13702.jpg,3,15717,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15717.jpg,0.0141717885
+13702,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13702.jpg,4,34849,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34849.jpg,0.014918893
+13702,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13702.jpg,5,18417,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/18417.jpg,0.015666703
+17592,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/17592.jpg,1,29955,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/29955.jpg,0.0071444497
+17592,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/17592.jpg,2,16867,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/16867.jpg,0.0080977995
+17592,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/17592.jpg,3,21299,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/21299.jpg,0.010235263
+17592,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/17592.jpg,4,29957,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/29957.jpg,0.011247588
+17592,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/17592.jpg,5,17309,Sunglasses,./A2_FashionDataset/FashionDataset/train/images_train/17309.jpg,0.012405159
+30756,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30756.jpg,1,19084,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/19084.jpg,0.0071104392
+30756,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30756.jpg,2,11553,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/11553.jpg,0.008354522
+30756,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30756.jpg,3,30744,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30744.jpg,0.008527993
+30756,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30756.jpg,4,28699,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28699.jpg,0.009395333
+30756,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30756.jpg,5,23325,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/23325.jpg,0.009630745
+30526,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30526.jpg,1,39532,Bra,./A2_FashionDataset/FashionDataset/train/images_train/39532.jpg,0.04703612
+30526,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30526.jpg,2,51187,Bra,./A2_FashionDataset/FashionDataset/train/images_train/51187.jpg,0.05839803
+30526,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30526.jpg,3,51004,Bra,./A2_FashionDataset/FashionDataset/train/images_train/51004.jpg,0.06529056
+30526,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30526.jpg,4,51048,Bra,./A2_FashionDataset/FashionDataset/train/images_train/51048.jpg,0.06770903
+30526,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30526.jpg,5,27145,Bra,./A2_FashionDataset/FashionDataset/train/images_train/27145.jpg,0.07257026
+35994,Capris,./A2_FashionDataset/FashionDataset/train/images_train/35994.jpg,1,27015,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/27015.jpg,0.041064896
+35994,Capris,./A2_FashionDataset/FashionDataset/train/images_train/35994.jpg,2,26995,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/26995.jpg,0.04323206
+35994,Capris,./A2_FashionDataset/FashionDataset/train/images_train/35994.jpg,3,9163,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/9163.jpg,0.06340716
+35994,Capris,./A2_FashionDataset/FashionDataset/train/images_train/35994.jpg,4,27004,Jeggings,./A2_FashionDataset/FashionDataset/train/images_train/27004.jpg,0.066489905
+35994,Capris,./A2_FashionDataset/FashionDataset/train/images_train/35994.jpg,5,27904,Trousers,./A2_FashionDataset/FashionDataset/train/images_train/27904.jpg,0.07611178
+31820,Watches,./A2_FashionDataset/FashionDataset/train/images_train/31820.jpg,1,46447,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46447.jpg,0.04533436
+31820,Watches,./A2_FashionDataset/FashionDataset/train/images_train/31820.jpg,2,45287,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45287.jpg,0.06011845
+31820,Watches,./A2_FashionDataset/FashionDataset/train/images_train/31820.jpg,3,45910,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45910.jpg,0.06043038
+31820,Watches,./A2_FashionDataset/FashionDataset/train/images_train/31820.jpg,4,37316,Watches,./A2_FashionDataset/FashionDataset/train/images_train/37316.jpg,0.061719276
+31820,Watches,./A2_FashionDataset/FashionDataset/train/images_train/31820.jpg,5,36896,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36896.jpg,0.061853968
+17189,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17189.jpg,1,2206,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/2206.jpg,0.039239757
+17189,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17189.jpg,2,10803,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10803.jpg,0.04504548
+17189,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17189.jpg,3,19733,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19733.jpg,0.04719416
+17189,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17189.jpg,4,2069,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/2069.jpg,0.054088414
+17189,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17189.jpg,5,5946,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/5946.jpg,0.060251646
+20227,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/20227.jpg,1,19331,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/19331.jpg,0.022400886
+20227,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/20227.jpg,2,11039,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/11039.jpg,0.0382764
+20227,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/20227.jpg,3,34308,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/34308.jpg,0.040918224
+20227,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/20227.jpg,4,24166,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/24166.jpg,0.0452769
+20227,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/20227.jpg,5,20135,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/20135.jpg,0.04810312
+10823,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10823.jpg,1,3079,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3079.jpg,0.0037367602
+10823,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10823.jpg,2,44890,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/44890.jpg,0.0038522664
+10823,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10823.jpg,3,4247,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/4247.jpg,0.0041821194
+10823,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10823.jpg,4,11743,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/11743.jpg,0.0047391355
+10823,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10823.jpg,5,26490,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26490.jpg,0.0050993245
+47071,Patiala,./A2_FashionDataset/FashionDataset/train/images_train/47071.jpg,1,9773,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/9773.jpg,0.038853202
+47071,Patiala,./A2_FashionDataset/FashionDataset/train/images_train/47071.jpg,2,47063,Patiala,./A2_FashionDataset/FashionDataset/train/images_train/47063.jpg,0.044660427
+47071,Patiala,./A2_FashionDataset/FashionDataset/train/images_train/47071.jpg,3,51397,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/51397.jpg,0.04680206
+47071,Patiala,./A2_FashionDataset/FashionDataset/train/images_train/47071.jpg,4,46390,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/46390.jpg,0.05368889
+47071,Patiala,./A2_FashionDataset/FashionDataset/train/images_train/47071.jpg,5,51377,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/51377.jpg,0.06418863
+10992,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10992.jpg,1,7744,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/7744.jpg,0.000612136
+10992,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10992.jpg,2,16933,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/16933.jpg,0.0006377616
+10992,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10992.jpg,3,3284,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3284.jpg,0.00070647924
+10992,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10992.jpg,4,10046,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10046.jpg,0.000783289
+10992,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10992.jpg,5,14682,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/14682.jpg,0.0007963853
+33602,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33602.jpg,1,33605,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33605.jpg,0.002796892
+33602,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33602.jpg,2,33608,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33608.jpg,0.009213732
+33602,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33602.jpg,3,33604,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33604.jpg,0.010906561
+33602,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33602.jpg,4,33364,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33364.jpg,0.012842032
+33602,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/33602.jpg,5,34728,Wallets,./A2_FashionDataset/FashionDataset/train/images_train/34728.jpg,0.014028426
+46317,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46317.jpg,1,46460,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46460.jpg,0.006791394
+46317,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46317.jpg,2,10164,Watches,./A2_FashionDataset/FashionDataset/train/images_train/10164.jpg,0.008800593
+46317,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46317.jpg,3,11179,Watches,./A2_FashionDataset/FashionDataset/train/images_train/11179.jpg,0.009526776
+46317,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46317.jpg,4,25662,Watches,./A2_FashionDataset/FashionDataset/train/images_train/25662.jpg,0.011794884
+46317,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46317.jpg,5,45002,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45002.jpg,0.014429409
+10404,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10404.jpg,1,11606,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/11606.jpg,0.19299361
+10404,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10404.jpg,2,18284,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/18284.jpg,0.19790392
+10404,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10404.jpg,3,23214,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/23214.jpg,0.21201651
+10404,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10404.jpg,4,9151,Tops,./A2_FashionDataset/FashionDataset/train/images_train/9151.jpg,0.21783906
+10404,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10404.jpg,5,33968,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/33968.jpg,0.227209
+15645,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/15645.jpg,1,28504,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/28504.jpg,0.035834208
+15645,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/15645.jpg,2,12812,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/12812.jpg,0.036724493
+15645,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/15645.jpg,3,28514,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/28514.jpg,0.04309859
+15645,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/15645.jpg,4,28627,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/28627.jpg,0.046235465
+15645,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/15645.jpg,5,28512,Shorts,./A2_FashionDataset/FashionDataset/train/images_train/28512.jpg,0.052470364
+46539,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46539.jpg,1,29748,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29748.jpg,0.0043414766
+46539,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46539.jpg,2,29913,Watches,./A2_FashionDataset/FashionDataset/train/images_train/29913.jpg,0.0064407447
+46539,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46539.jpg,3,21683,Watches,./A2_FashionDataset/FashionDataset/train/images_train/21683.jpg,0.006701667
+46539,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46539.jpg,4,21671,Watches,./A2_FashionDataset/FashionDataset/train/images_train/21671.jpg,0.007316181
+46539,Watches,./A2_FashionDataset/FashionDataset/train/images_train/46539.jpg,5,41048,Watches,./A2_FashionDataset/FashionDataset/train/images_train/41048.jpg,0.007792568
+22759,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22759.jpg,1,30879,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/30879.jpg,0.019499844
+22759,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22759.jpg,2,6874,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/6874.jpg,0.027067285
+22759,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22759.jpg,3,11788,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/11788.jpg,0.034307618
+22759,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22759.jpg,4,22772,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22772.jpg,0.03452339
+22759,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/22759.jpg,5,12072,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/12072.jpg,0.03673408
+44751,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/44751.jpg,1,23878,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23878.jpg,0.0013430971
+44751,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/44751.jpg,2,49478,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/49478.jpg,0.0015550376
+44751,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/44751.jpg,3,11839,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11839.jpg,0.002318529
+44751,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/44751.jpg,4,15248,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15248.jpg,0.0029606214
+44751,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/44751.jpg,5,42043,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/42043.jpg,0.003498876
+28712,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28712.jpg,1,32271,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/32271.jpg,0.0073558427
+28712,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28712.jpg,2,11559,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/11559.jpg,0.008739339
+28712,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28712.jpg,3,12122,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/12122.jpg,0.009961149
+28712,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28712.jpg,4,31062,Dupatta,./A2_FashionDataset/FashionDataset/train/images_train/31062.jpg,0.012123896
+28712,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28712.jpg,5,12061,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/12061.jpg,0.013343184
+34349,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34349.jpg,1,29046,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/29046.jpg,0.00023414116
+34349,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34349.jpg,2,23157,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/23157.jpg,0.0015077716
+34349,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34349.jpg,3,2212,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/2212.jpg,0.0017908018
+34349,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34349.jpg,4,22810,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/22810.jpg,0.0019850163
+34349,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34349.jpg,5,16899,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/16899.jpg,0.0021167337
+6294,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6294.jpg,1,34330,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34330.jpg,0.0066266633
+6294,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6294.jpg,2,8557,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/8557.jpg,0.006742659
+6294,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6294.jpg,3,13429,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/13429.jpg,0.0072877826
+6294,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6294.jpg,4,27372,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/27372.jpg,0.0073694484
+6294,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6294.jpg,5,18229,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/18229.jpg,0.008173948
+25161,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25161.jpg,1,25208,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25208.jpg,0.0024816578
+25161,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25161.jpg,2,25244,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25244.jpg,0.0034825432
+25161,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25161.jpg,3,25148,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25148.jpg,0.0041665155
+25161,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25161.jpg,4,25156,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25156.jpg,0.0057445876
+25161,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25161.jpg,5,25182,Handbags,./A2_FashionDataset/FashionDataset/train/images_train/25182.jpg,0.005991
+27490,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27490.jpg,1,28004,Trunk,./A2_FashionDataset/FashionDataset/train/images_train/28004.jpg,0.13390118
+27490,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27490.jpg,2,27493,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27493.jpg,0.16641656
+27490,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27490.jpg,3,27491,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27491.jpg,0.22877866
+27490,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27490.jpg,4,28012,Trunk,./A2_FashionDataset/FashionDataset/train/images_train/28012.jpg,0.23441868
+27490,Briefs,./A2_FashionDataset/FashionDataset/train/images_train/27490.jpg,5,27948,Trunk,./A2_FashionDataset/FashionDataset/train/images_train/27948.jpg,0.2730375
+39275,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39275.jpg,1,39291,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39291.jpg,0.06696439
+39275,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39275.jpg,2,23862,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23862.jpg,0.086237244
+39275,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39275.jpg,3,35931,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/35931.jpg,0.08753018
+39275,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39275.jpg,4,4994,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/4994.jpg,0.10536723
+39275,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/39275.jpg,5,23836,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23836.jpg,0.11869283
+17719,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17719.jpg,1,12357,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12357.jpg,0.18238366
+17719,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17719.jpg,2,17713,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17713.jpg,0.2610293
+17719,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17719.jpg,3,33237,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/33237.jpg,0.27807868
+17719,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17719.jpg,4,5024,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/5024.jpg,0.27810708
+17719,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/17719.jpg,5,34689,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/34689.jpg,0.29673913
+49290,Socks,./A2_FashionDataset/FashionDataset/train/images_train/49290.jpg,1,31990,Socks,./A2_FashionDataset/FashionDataset/train/images_train/31990.jpg,0.008039404
+49290,Socks,./A2_FashionDataset/FashionDataset/train/images_train/49290.jpg,2,41525,Socks,./A2_FashionDataset/FashionDataset/train/images_train/41525.jpg,0.009794004
+49290,Socks,./A2_FashionDataset/FashionDataset/train/images_train/49290.jpg,3,49307,Socks,./A2_FashionDataset/FashionDataset/train/images_train/49307.jpg,0.013859853
+49290,Socks,./A2_FashionDataset/FashionDataset/train/images_train/49290.jpg,4,31993,Socks,./A2_FashionDataset/FashionDataset/train/images_train/31993.jpg,0.02303774
+49290,Socks,./A2_FashionDataset/FashionDataset/train/images_train/49290.jpg,5,43402,Socks,./A2_FashionDataset/FashionDataset/train/images_train/43402.jpg,0.030432483
+15901,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/15901.jpg,1,5622,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/5622.jpg,0.021231668
+15901,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/15901.jpg,2,5621,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/5621.jpg,0.028444994
+15901,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/15901.jpg,3,23817,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/23817.jpg,0.030154947
+15901,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/15901.jpg,4,15897,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/15897.jpg,0.030907944
+15901,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/15901.jpg,5,44715,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/44715.jpg,0.0361314
+23333,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/23333.jpg,1,23313,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/23313.jpg,0.003178448
+23333,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/23333.jpg,2,50331,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/50331.jpg,0.005381639
+23333,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/23333.jpg,3,28725,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28725.jpg,0.005869099
+23333,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/23333.jpg,4,28724,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28724.jpg,0.0062206327
+23333,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/23333.jpg,5,28734,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/28734.jpg,0.0067941975
+35000,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/35000.jpg,1,35018,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/35018.jpg,0.0100091845
+35000,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/35000.jpg,2,45780,Tunics,./A2_FashionDataset/FashionDataset/train/images_train/45780.jpg,0.011908056
+35000,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/35000.jpg,3,50355,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/50355.jpg,0.017022427
+35000,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/35000.jpg,4,15102,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/15102.jpg,0.0216581
+35000,Stoles,./A2_FashionDataset/FashionDataset/train/images_train/35000.jpg,5,39716,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/39716.jpg,0.032298036
+34850,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34850.jpg,1,9052,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/9052.jpg,0.02858014
+34850,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34850.jpg,2,13688,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13688.jpg,0.037835944
+34850,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34850.jpg,3,15746,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15746.jpg,0.042801518
+34850,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34850.jpg,4,42023,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/42023.jpg,0.04424266
+34850,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34850.jpg,5,46084,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/46084.jpg,0.04579678
+36760,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36760.jpg,1,36763,Free Gifts,./A2_FashionDataset/FashionDataset/train/images_train/36763.jpg,0.0036563936
+36760,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36760.jpg,2,36765,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36765.jpg,0.0075890804
+36760,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36760.jpg,3,49847,Watches,./A2_FashionDataset/FashionDataset/train/images_train/49847.jpg,0.008202437
+36760,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36760.jpg,4,49846,Watches,./A2_FashionDataset/FashionDataset/train/images_train/49846.jpg,0.008748303
+36760,Watches,./A2_FashionDataset/FashionDataset/train/images_train/36760.jpg,5,36764,Free Gifts,./A2_FashionDataset/FashionDataset/train/images_train/36764.jpg,0.009552447
+14114,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/14114.jpg,1,11334,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/11334.jpg,0.0055694035
+14114,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/14114.jpg,2,23453,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/23453.jpg,0.0065451018
+14114,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/14114.jpg,3,11290,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/11290.jpg,0.006999057
+14114,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/14114.jpg,4,14124,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/14124.jpg,0.00864768
+14114,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/14114.jpg,5,50956,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/50956.jpg,0.016516935
+4697,Watches,./A2_FashionDataset/FashionDataset/train/images_train/4697.jpg,1,45265,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45265.jpg,0.008844276
+4697,Watches,./A2_FashionDataset/FashionDataset/train/images_train/4697.jpg,2,4715,Watches,./A2_FashionDataset/FashionDataset/train/images_train/4715.jpg,0.020498049
+4697,Watches,./A2_FashionDataset/FashionDataset/train/images_train/4697.jpg,3,38015,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38015.jpg,0.027808318
+4697,Watches,./A2_FashionDataset/FashionDataset/train/images_train/4697.jpg,4,45005,Watches,./A2_FashionDataset/FashionDataset/train/images_train/45005.jpg,0.03501644
+4697,Watches,./A2_FashionDataset/FashionDataset/train/images_train/4697.jpg,5,38014,Watches,./A2_FashionDataset/FashionDataset/train/images_train/38014.jpg,0.03873322
+12460,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12460.jpg,1,19711,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19711.jpg,0.03938048
+12460,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12460.jpg,2,12251,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12251.jpg,0.04491786
+12460,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12460.jpg,3,14663,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/14663.jpg,0.047176763
+12460,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12460.jpg,4,13744,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/13744.jpg,0.05204294
+12460,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12460.jpg,5,21236,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/21236.jpg,0.05426058
+46905,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/46905.jpg,1,31338,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/31338.jpg,0.019393817
+46905,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/46905.jpg,2,23451,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/23451.jpg,0.033479013
+46905,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/46905.jpg,3,11340,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/11340.jpg,0.03560899
+46905,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/46905.jpg,4,13351,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/13351.jpg,0.04395914
+46905,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/46905.jpg,5,18185,Jeans,./A2_FashionDataset/FashionDataset/train/images_train/18185.jpg,0.044177312
+5404,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5404.jpg,1,34646,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/34646.jpg,0.023907963
+5404,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5404.jpg,2,3300,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3300.jpg,0.024380706
+5404,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5404.jpg,3,12968,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/12968.jpg,0.02674774
+5404,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5404.jpg,4,1542,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/1542.jpg,0.028806753
+5404,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5404.jpg,5,5466,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5466.jpg,0.034570772
+20076,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/20076.jpg,1,36564,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/36564.jpg,0.029417347
+20076,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/20076.jpg,2,28222,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28222.jpg,0.04360878
+20076,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/20076.jpg,3,20075,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/20075.jpg,0.05749491
+20076,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/20076.jpg,4,28220,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28220.jpg,0.061150808
+20076,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/20076.jpg,5,27328,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/27328.jpg,0.06567621
+28236,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28236.jpg,1,18462,Perfume and Body Mist,./A2_FashionDataset/FashionDataset/train/images_train/18462.jpg,0.0278812
+28236,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28236.jpg,2,46651,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/46651.jpg,0.04859667
+28236,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28236.jpg,3,46948,Perfume and Body Mist,./A2_FashionDataset/FashionDataset/train/images_train/46948.jpg,0.060228057
+28236,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28236.jpg,4,44961,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/44961.jpg,0.07409234
+28236,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28236.jpg,5,12452,Shoe Accessories,./A2_FashionDataset/FashionDataset/train/images_train/12452.jpg,0.07471753
+23578,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/23578.jpg,1,32521,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/32521.jpg,0.16463101
+23578,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/23578.jpg,2,32549,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/32549.jpg,0.1996097
+23578,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/23578.jpg,3,23559,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/23559.jpg,0.2052547
+23578,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/23578.jpg,4,41904,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/41904.jpg,0.20763624
+23578,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/23578.jpg,5,23593,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/23593.jpg,0.24207643
+8156,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8156.jpg,1,10444,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/10444.jpg,0.020476954
+8156,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8156.jpg,2,12178,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12178.jpg,0.02345464
+8156,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8156.jpg,3,37743,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/37743.jpg,0.024643485
+8156,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8156.jpg,4,11250,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/11250.jpg,0.02473167
+8156,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/8156.jpg,5,12187,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12187.jpg,0.025333202
+33135,Heels,./A2_FashionDataset/FashionDataset/train/images_train/33135.jpg,1,17685,Heels,./A2_FashionDataset/FashionDataset/train/images_train/17685.jpg,0.0024252199
+33135,Heels,./A2_FashionDataset/FashionDataset/train/images_train/33135.jpg,2,20279,Heels,./A2_FashionDataset/FashionDataset/train/images_train/20279.jpg,0.0042744903
+33135,Heels,./A2_FashionDataset/FashionDataset/train/images_train/33135.jpg,3,42740,Heels,./A2_FashionDataset/FashionDataset/train/images_train/42740.jpg,0.0068630883
+33135,Heels,./A2_FashionDataset/FashionDataset/train/images_train/33135.jpg,4,46588,Heels,./A2_FashionDataset/FashionDataset/train/images_train/46588.jpg,0.0074783196
+33135,Heels,./A2_FashionDataset/FashionDataset/train/images_train/33135.jpg,5,49621,Heels,./A2_FashionDataset/FashionDataset/train/images_train/49621.jpg,0.009120856
+15866,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15866.jpg,1,11931,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/11931.jpg,0.013535733
+15866,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15866.jpg,2,3828,Flip Flops,./A2_FashionDataset/FashionDataset/train/images_train/3828.jpg,0.07565137
+15866,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15866.jpg,3,8913,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/8913.jpg,0.09304828
+15866,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15866.jpg,4,22821,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22821.jpg,0.12746036
+15866,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15866.jpg,5,43004,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/43004.jpg,0.13466537
+3657,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3657.jpg,1,3677,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3677.jpg,0.016961642
+3657,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3657.jpg,2,13911,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13911.jpg,0.017360061
+3657,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3657.jpg,3,6640,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/6640.jpg,0.019659342
+3657,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3657.jpg,4,7836,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/7836.jpg,0.022532977
+3657,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3657.jpg,5,5481,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/5481.jpg,0.027659645
+12043,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12043.jpg,1,12033,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12033.jpg,0.012940327
+12043,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12043.jpg,2,12339,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12339.jpg,0.014018164
+12043,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12043.jpg,3,37129,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/37129.jpg,0.01740358
+12043,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12043.jpg,4,12038,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12038.jpg,0.021562824
+12043,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12043.jpg,5,12032,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12032.jpg,0.022719018
+10665,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10665.jpg,1,3685,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3685.jpg,0.008401082
+10665,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10665.jpg,2,16704,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/16704.jpg,0.024156028
+10665,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10665.jpg,3,24732,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/24732.jpg,0.028849602
+10665,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10665.jpg,4,3432,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3432.jpg,0.029409118
+10665,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/10665.jpg,5,9551,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/9551.jpg,0.030883048
+44159,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/44159.jpg,1,43100,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/43100.jpg,0.073571295
+44159,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/44159.jpg,2,46899,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/46899.jpg,0.107283756
+44159,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/44159.jpg,3,19441,Gloves,./A2_FashionDataset/FashionDataset/train/images_train/19441.jpg,0.119404376
+44159,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/44159.jpg,4,23593,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/23593.jpg,0.14640296
+44159,Fragrance Gift Set,./A2_FashionDataset/FashionDataset/train/images_train/44159.jpg,5,26735,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/26735.jpg,0.15556315
+7968,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/7968.jpg,1,29242,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/29242.jpg,0.00097482494
+7968,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/7968.jpg,2,2803,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/2803.jpg,0.001196018
+7968,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/7968.jpg,3,39824,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/39824.jpg,0.0013737667
+7968,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/7968.jpg,4,19142,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/19142.jpg,0.0016719375
+7968,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/7968.jpg,5,47175,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/47175.jpg,0.0020874375
+32497,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32497.jpg,1,17694,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/17694.jpg,0.016060248
+32497,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32497.jpg,2,35674,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/35674.jpg,0.016430892
+32497,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32497.jpg,3,3644,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3644.jpg,0.020120485
+32497,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32497.jpg,4,24666,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24666.jpg,0.022496361
+32497,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/32497.jpg,5,20897,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/20897.jpg,0.026573658
+41680,Heels,./A2_FashionDataset/FashionDataset/train/images_train/41680.jpg,1,46603,Heels,./A2_FashionDataset/FashionDataset/train/images_train/46603.jpg,0.016124563
+41680,Heels,./A2_FashionDataset/FashionDataset/train/images_train/41680.jpg,2,42724,Flats,./A2_FashionDataset/FashionDataset/train/images_train/42724.jpg,0.016140306
+41680,Heels,./A2_FashionDataset/FashionDataset/train/images_train/41680.jpg,3,49579,Heels,./A2_FashionDataset/FashionDataset/train/images_train/49579.jpg,0.017518118
+41680,Heels,./A2_FashionDataset/FashionDataset/train/images_train/41680.jpg,4,22263,Heels,./A2_FashionDataset/FashionDataset/train/images_train/22263.jpg,0.02388699
+41680,Heels,./A2_FashionDataset/FashionDataset/train/images_train/41680.jpg,5,22277,Heels,./A2_FashionDataset/FashionDataset/train/images_train/22277.jpg,0.027621908
+5266,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/5266.jpg,1,15919,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/15919.jpg,0.025912633
+5266,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/5266.jpg,2,21268,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/21268.jpg,0.032094244
+5266,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/5266.jpg,3,25256,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/25256.jpg,0.04876557
+5266,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/5266.jpg,4,15925,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/15925.jpg,0.05647232
+5266,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/5266.jpg,5,22737,Backpacks,./A2_FashionDataset/FashionDataset/train/images_train/22737.jpg,0.05672364
+3209,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3209.jpg,1,24342,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/24342.jpg,0.02567308
+3209,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3209.jpg,2,39001,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/39001.jpg,0.026332468
+3209,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3209.jpg,3,40947,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/40947.jpg,0.026332468
+3209,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3209.jpg,4,48257,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/48257.jpg,0.040561747
+3209,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/3209.jpg,5,16421,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/16421.jpg,0.040778004
+19176,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19176.jpg,1,19428,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19428.jpg,0.0025320281
+19176,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19176.jpg,2,13404,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/13404.jpg,0.005873318
+19176,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19176.jpg,3,12940,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/12940.jpg,0.0076535316
+19176,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19176.jpg,4,15967,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/15967.jpg,0.00943034
+19176,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/19176.jpg,5,51420,Shirts,./A2_FashionDataset/FashionDataset/train/images_train/51420.jpg,0.010947904
+28265,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28265.jpg,1,43111,Perfume and Body Mist,./A2_FashionDataset/FashionDataset/train/images_train/43111.jpg,0.07170595
+28265,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28265.jpg,2,28264,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28264.jpg,0.072028674
+28265,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28265.jpg,3,28266,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28266.jpg,0.10306831
+28265,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28265.jpg,4,27327,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/27327.jpg,0.11077393
+28265,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/28265.jpg,5,23588,Deodorant,./A2_FashionDataset/FashionDataset/train/images_train/23588.jpg,0.11827716
+11368,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/11368.jpg,1,11130,Tops,./A2_FashionDataset/FashionDataset/train/images_train/11130.jpg,0.16063707
+11368,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/11368.jpg,2,21141,Tops,./A2_FashionDataset/FashionDataset/train/images_train/21141.jpg,0.16433786
+11368,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/11368.jpg,3,19644,Tops,./A2_FashionDataset/FashionDataset/train/images_train/19644.jpg,0.17057389
+11368,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/11368.jpg,4,21162,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/21162.jpg,0.21233387
+11368,Jackets,./A2_FashionDataset/FashionDataset/train/images_train/11368.jpg,5,11011,Tops,./A2_FashionDataset/FashionDataset/train/images_train/11011.jpg,0.21573111
+26874,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26874.jpg,1,7206,Tops,./A2_FashionDataset/FashionDataset/train/images_train/7206.jpg,0.027656265
+26874,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26874.jpg,2,6592,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/6592.jpg,0.035053685
+26874,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26874.jpg,3,12606,Tops,./A2_FashionDataset/FashionDataset/train/images_train/12606.jpg,0.037808865
+26874,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26874.jpg,4,27353,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/27353.jpg,0.04008437
+26874,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/26874.jpg,5,40373,Tops,./A2_FashionDataset/FashionDataset/train/images_train/40373.jpg,0.043436542
+14323,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/14323.jpg,1,3967,Tops,./A2_FashionDataset/FashionDataset/train/images_train/3967.jpg,0.025371233
+14323,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/14323.jpg,2,22219,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/22219.jpg,0.055591177
+14323,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/14323.jpg,3,6979,Tops,./A2_FashionDataset/FashionDataset/train/images_train/6979.jpg,0.057182614
+14323,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/14323.jpg,4,43528,Tops,./A2_FashionDataset/FashionDataset/train/images_train/43528.jpg,0.057299804
+14323,Sweaters,./A2_FashionDataset/FashionDataset/train/images_train/14323.jpg,5,39231,Tops,./A2_FashionDataset/FashionDataset/train/images_train/39231.jpg,0.06204523
+34440,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34440.jpg,1,34445,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34445.jpg,0.04028356
+34440,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34440.jpg,2,21424,Tops,./A2_FashionDataset/FashionDataset/train/images_train/21424.jpg,0.051877283
+34440,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34440.jpg,3,37184,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/37184.jpg,0.06668353
+34440,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34440.jpg,4,34430,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34430.jpg,0.07254466
+34440,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/34440.jpg,5,9764,Tshirts,./A2_FashionDataset/FashionDataset/train/images_train/9764.jpg,0.07357755
+24670,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24670.jpg,1,3238,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3238.jpg,0.02400244
+24670,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24670.jpg,2,47238,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/47238.jpg,0.036320526
+24670,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24670.jpg,3,22092,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22092.jpg,0.036703616
+24670,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24670.jpg,4,14490,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/14490.jpg,0.04072953
+24670,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/24670.jpg,5,42007,Sandals,./A2_FashionDataset/FashionDataset/train/images_train/42007.jpg,0.04497777
+2396,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2396.jpg,1,33349,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/33349.jpg,0.045314662
+2396,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2396.jpg,2,22141,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22141.jpg,0.047374543
+2396,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2396.jpg,3,33704,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/33704.jpg,0.049495168
+2396,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2396.jpg,4,33339,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/33339.jpg,0.051816583
+2396,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/2396.jpg,5,15060,Formal Shoes,./A2_FashionDataset/FashionDataset/train/images_train/15060.jpg,0.053211577
+48485,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/48485.jpg,1,40597,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/40597.jpg,0.045982074
+48485,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/48485.jpg,2,27191,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/27191.jpg,0.055655114
+48485,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/48485.jpg,3,12152,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/12152.jpg,0.05607312
+48485,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/48485.jpg,4,19077,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/19077.jpg,0.056616507
+48485,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/48485.jpg,5,15830,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/15830.jpg,0.061544992
+45096,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45096.jpg,1,30535,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30535.jpg,0.040216655
+45096,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45096.jpg,2,51013,Bra,./A2_FashionDataset/FashionDataset/train/images_train/51013.jpg,0.04039315
+45096,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45096.jpg,3,51025,Bra,./A2_FashionDataset/FashionDataset/train/images_train/51025.jpg,0.04771936
+45096,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45096.jpg,4,50976,Bra,./A2_FashionDataset/FashionDataset/train/images_train/50976.jpg,0.05173213
+45096,Bra,./A2_FashionDataset/FashionDataset/train/images_train/45096.jpg,5,30495,Bra,./A2_FashionDataset/FashionDataset/train/images_train/30495.jpg,0.083625674
+23814,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23814.jpg,1,36837,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/36837.jpg,0.05486711
+23814,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23814.jpg,2,26600,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/26600.jpg,0.070703745
+23814,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23814.jpg,3,13992,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/13992.jpg,0.085090525
+23814,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23814.jpg,4,8963,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/8963.jpg,0.08546529
+23814,Casual Shoes,./A2_FashionDataset/FashionDataset/train/images_train/23814.jpg,5,8528,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/8528.jpg,0.086000465
+38722,Tunics,./A2_FashionDataset/FashionDataset/train/images_train/38722.jpg,1,39470,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/39470.jpg,0.10549115
+38722,Tunics,./A2_FashionDataset/FashionDataset/train/images_train/38722.jpg,2,12771,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/12771.jpg,0.12158573
+38722,Tunics,./A2_FashionDataset/FashionDataset/train/images_train/38722.jpg,3,19085,Kurtas,./A2_FashionDataset/FashionDataset/train/images_train/19085.jpg,0.12314138
+38722,Tunics,./A2_FashionDataset/FashionDataset/train/images_train/38722.jpg,4,23050,Dresses,./A2_FashionDataset/FashionDataset/train/images_train/23050.jpg,0.12694713
+38722,Tunics,./A2_FashionDataset/FashionDataset/train/images_train/38722.jpg,5,28951,Kurtis,./A2_FashionDataset/FashionDataset/train/images_train/28951.jpg,0.12794125
+46804,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/46804.jpg,1,4543,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/4543.jpg,0.02410551
+46804,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/46804.jpg,2,22113,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/22113.jpg,0.026748639
+46804,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/46804.jpg,3,4508,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/4508.jpg,0.032151494
+46804,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/46804.jpg,4,12968,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/12968.jpg,0.03381321
+46804,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/46804.jpg,5,3366,Sports Shoes,./A2_FashionDataset/FashionDataset/train/images_train/3366.jpg,0.03978853

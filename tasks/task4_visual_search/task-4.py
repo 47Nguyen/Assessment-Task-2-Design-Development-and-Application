@@ -65,15 +65,14 @@ def preprocess_image(filename):
     image = tf.image.resize(image, target_shape)
     return image
 
-
-def print_image(index):
-    """
-    Show one preprocessed image from df_train.
-    """
-    plt.figure(dpi = 28)
-    image = preprocess_image(df_train['path'][index])
-    plt.imshow(image)
-    plt.show()
+# def print_image(index):
+#     """
+#     Show one preprocessed image from df_train.
+#     """
+#     plt.figure(dpi = 28)
+#     image = preprocess_image(df_train['path'][index])
+#     plt.imshow(image)
+#     plt.show()
 
 
 def preprocess_triplets(anchor, reference, disimilar):
@@ -183,8 +182,6 @@ def val_step(model, anchor, reference, disimilar, margin = 0.5):
 
 
 # SECTION 5: Triplet sampling - how anchor/positive/negative get chosen
-
-
 def positive_pairs(types):
     """
     Every image is an anchor once, paired with a random different image of the
@@ -445,7 +442,7 @@ def search(model, query_path, index, df, k = 5):
 
     return df.iloc[nearest], distances[nearest]
 
-
+# Provide the top 5 closest images
 def topk_predictions(model, index, index_df, query_df, n_queries = 100, k = 5):
     """
     Top k neighbours for the first n_queries validation images.
@@ -476,7 +473,7 @@ def topk_predictions(model, index, index_df, query_df, n_queries = 100, k = 5):
 
     return pd.DataFrame(rows), float(np.mean(scores))
 
-
+# Save the results if doesn't exist
 def show_results(query_path, results, save_to = 'outputs/task_4/task4_query_grid.png'):
     """
     Show the query next to what we retrieved, saved as one row of pictures.
@@ -518,7 +515,7 @@ def squared_distances(queries, index, chunk = 256):
     # floating point error can push a distance a hair below zero
     return np.maximum(distances, 0.0)
 
-
+# Help with AI for this function 
 def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
                        k_list = (1, 5, 10), map_k = 10, seed = 42):
     """
@@ -572,8 +569,7 @@ def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
     metrics['n_queries'] = len(queries)
     return metrics
 
-# SECTION 8b: Justifying the two numbers we picked by hand - K and the
-# structure of the embedding space. Both read saved artefacts, neither trains.
+# SECTION 8b: Justifying the two numbers we picked by hand 
 def precision_at_k_curve(model, index, index_df, query_df, k_max = 20,
                          n_queries = 500, seed = 42,
                          save_to = 'outputs/task_4/pk_curve.csv'):
@@ -602,15 +598,9 @@ def precision_at_k_curve(model, index, index_df, query_df, k_max = 20,
     curve.to_csv(save_to, index = False)
     return curve
 
-# Referred to the slide 
-def embedding_elbow(index, k_list = range(2, 41), sample = 5000, seed = 42,
-                    save_to = 'outputs/task_4/elbow.csv'):
-    """
-    Summed distance against k over the saved embeddings - the elbow method.
+# Elbmow method to find the correct value of K
+def embedding_elbow(index, k_list = range(2, 41), sample = 5000, seed = 42, save_to = 'outputs/task_4/elbow.csv'):
 
-    SD always falls as k rises, so it is read for the bend, not the minimum.
-    n_init = 10 because k-means only finds a local optimum from one start.
-    """
     rng = np.random.RandomState(seed)
     if len(index) > sample:
         index = index[rng.choice(len(index), sample, replace = False)]
@@ -624,7 +614,7 @@ def embedding_elbow(index, k_list = range(2, 41), sample = 5000, seed = 42,
     elbow.to_csv(save_to, index = False)
     return elbow
 
-
+## Needed AI help for this function
 def cluster_purity(index, index_df, k = 30, sample = 5000, seed = 42,
                    save_to = 'outputs/task_4/cluster_purity.csv'):
     """
@@ -678,7 +668,7 @@ EXPERIMENTS = [
     {**BASE_CONFIG, 'name': 'tuned_semihard', 'sampler': 'semihard', 'epochs': 10},
 ]
 
-
+## Needed AI for this functio
 def run_experiment(config, train_df, val_df, n_queries = 500):
     """
     Train one configuration end to end and hand back its results row.
@@ -719,8 +709,6 @@ def run_experiment(config, train_df, val_df, n_queries = 500):
     }
     return model, row, history, index
 
-
-
 # Needed AI help for this function
 def fine_tune(train_df, val_df, n_queries = 500):
     """
@@ -756,7 +744,7 @@ def fine_tune(train_df, val_df, n_queries = 500):
     table.to_csv(RESULTS_FILE, index = False)
     return table
 
-# 
+# Run sample on top 30 article_type
 def subsample_catalogue(df, n_types = 30):
     """
     A smaller catalogue for a quicker comparison, so a run takes minutes
@@ -768,19 +756,14 @@ def subsample_catalogue(df, n_types = 30):
     biggest = df['articleType'].value_counts().head(n_types).index
     return df[df['articleType'].isin(biggest)].reset_index(drop = True)
 
-
-
 # SECTION 10: Setup
-
 RUN_FINE_TUNE = False
-RUN_FINALISE = False
-# The K curve and the elbow. Read only - they never touch the saved model,
-# the index or any number already in results_task4.csv.
+RUN_FINALISE = True
+# The K curve and the elbow. Read only - they never touch the saved model, the index or any number already in results_task4.csv.
 RUN_ANALYSIS = False
 
 
 # SECTION 11: Running pipeline with functions swetup
-
 MODEL_FILE = 'models/task_4/embedding_visual_search.keras'
 INDEX_FILE = 'models/task_4/embeddings_task4.npy'
 
@@ -796,8 +779,7 @@ if Path(MODEL_FILE).exists() and Path(INDEX_FILE).exists():
     model = tf.keras.models.load_model(MODEL_FILE)
     index = np.load(INDEX_FILE)
 else:
-    # BASE_CONFIG is the original setup - random negatives, 4 epochs, no early
-    # stopping - so this rebuilds the same baseline through the one training
+    # BASE_CONFIG is the original setup - random negatives, 4 epochs, no early stopping - so this rebuilds the same baseline through the one training
     # path the file now has.
     model, _, _, index = run_experiment(EXPERIMENTS[0], train_df, val_df)
 
@@ -813,7 +795,7 @@ print(f"query: {query['articleType']}  {query['path']}")
 print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
 
 # 5. Run the validation queries once, then use that same pass for both the output file and the precision score
-predictions, precision = topk_predictions(model, index, train_df, val_df)
+predictions, precision = topk_predictions(model, index, train_df, val_df, n_queries = 500)
 predictions.to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
 
 print(f"precision@5: {precision:.3f}")
@@ -823,8 +805,7 @@ show_results(query['path'], results)
 
 # 7. Fine tuning - baseline vs semi-hard on a 30 type subsample. Off by default because it retrains the model twice (~2 hours). See SECTION 10.
 if RUN_FINE_TUNE:
-    tuning_table = fine_tune(subsample_catalogue(train_df),
-                             subsample_catalogue(val_df))
+    tuning_table = fine_tune(subsample_catalogue(train_df),subsample_catalogue(val_df))
     print(tuning_table[['name', 'p_at_1', 'p_at_5', 'p_at_10',
                         'map_at_10', 'active_fraction']])
 
@@ -837,21 +818,20 @@ if RUN_FINALISE:
     np.save(TUNED_INDEX_FILE, tuned_index)
 
     tuned_predictions, tuned_precision = topk_predictions(tuned_model, tuned_index,
-                                                          train_df, val_df)
+                                                          train_df, val_df, n_queries = 500)
     tuned_predictions.to_csv('outputs/task_4/task4_topk_predictions_tuned.csv',
                              index = False)
 
     # same query as the baseline figure, so the two grids are comparable
     tuned_results, _ = search(tuned_model, query['path'], tuned_index, train_df, k = 5)
-    show_results(query['path'], tuned_results,
-                 save_to = 'outputs/task_4/task4_query_grid_tuned.png')
+    show_results(query['path'], tuned_results, save_to = 'outputs/task_4/task4_query_grid_tuned.png')
 
-    print(f"tuned precision@5 on the full catalogue: {tuned_precision:.3f}")
     print(tuned_results[['id', 'articleType', 'baseColour', 'masterCategory']])
+    print(f"tuned precision@5 on the full catalogue: {tuned_precision:.3f}")
+    
 
 
-# 9. Justification analysis - why K = 5, and evidence the embedding space is
-#    structured. Off by default because it re-embeds the validation queries.
+# 9. Justification analysis - why K = 5, and evidence the embedding space is structured. Off by default because it re-embeds the validation queries.
 if RUN_ANALYSIS:
     curve = precision_at_k_curve(model, index, train_df, val_df)
     print(curve.to_string(index = False))
