@@ -19,6 +19,10 @@ outputs/task_4/task4_topk_predictions_tuned.csv
 
 # Generated artefacts
 cache/
+
+# Large trained model files (exceed GitHub file size limits)
+models/task_2/rf_season.joblib
+models/task_2/rf_season_base.joblib
 # Python
 __pycache__/
 *.py[cod]

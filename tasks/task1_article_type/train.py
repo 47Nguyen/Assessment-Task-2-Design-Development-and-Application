@@ -18,8 +18,8 @@ from tqdm import tqdm
 from tasks._submission import update_submission
 
 SEED = 42
-MODEL_DIR = Path("models")
-OUTPUT_DIR = Path("outputs")
+MODEL_DIR = Path("models/task_1")
+OUTPUT_DIR = Path("outputs/task_1")
 CACHE_DIR = Path("cache")
 
 MODEL_DIR.mkdir(parents=True, exist_ok=True)

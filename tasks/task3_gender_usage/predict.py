@@ -1,18 +1,9 @@
 """
 Task 3: Reload the trained MLPs to predict gender and usage.
 
-HOW TO RUN (from the project root, after running train.py):
-    python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --image A2_FashionDataset/FashionDataset/test/images_test/52003.jpg
-    python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --export
-
-Use the models folder from your actual run. Prediction does NOT train again.
---export fills only gender and usage in outputs/COSC253_A2_SG_G9.csv;
-other tasks' columns stay unchanged.
 """
 
-# ---------------------------------------------------------------------------
 # 1. Setup: use the exact image preparation shared with train.py
-# ---------------------------------------------------------------------------
 import argparse
 import io
 import json
@@ -29,9 +20,7 @@ from .data import TARGETS, find_root, prepare_image
 from tasks._submission import update_submission
 
 
-# ---------------------------------------------------------------------------
 # 2. Load both final models and their saved class/preprocessing information
-# ---------------------------------------------------------------------------
 class Task3Predictor:
     """Keep the gender and usage models loaded for repeated predictions."""
 
@@ -66,9 +55,7 @@ class Task3Predictor:
             self.models[target] = model
             self.specifications[target] = specification
 
-    # -----------------------------------------------------------------------
-    # 3. Predict batches without loading the entire test set into memory
-    # -----------------------------------------------------------------------
+# 3. Predict batches without loading the entire test set into memory
     def predict_paths(self, paths, batch_size=128):
         """Return {target: probability_array}, preserving the input path order."""
         if batch_size < 1:
@@ -144,9 +131,7 @@ class Task3Predictor:
         return predictions
 
 
-# ---------------------------------------------------------------------------
 # 4. Export test predictions into the shared submission file
-# ---------------------------------------------------------------------------
 def export_submission(repo_root, models_dir):
     """Fill gender and usage for every test image in the shared submission file."""
     root = find_root(repo_root)
@@ -170,9 +155,7 @@ def export_submission(repo_root, models_dir):
     update_submission(official["id"], columns)
 
 
-# ---------------------------------------------------------------------------
 # 5. Optional notebook upload demo (NOT needed for command-line execution)
-# ---------------------------------------------------------------------------
 def notebook_demo(models_dir):
     """Keep existing notebooks compatible; import widget packages only if used."""
     import ipywidgets as widgets
@@ -219,9 +202,7 @@ def notebook_demo(models_dir):
     return upload
 
 
-# ---------------------------------------------------------------------------
 # 6. Choose a single-image prediction OR a full test-set CSV export
-# ---------------------------------------------------------------------------
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(

@@ -10,9 +10,7 @@ FLOW: audit data -> split -> train candidates -> select on validation ->
 No pretrained weights, notebook, or shared src/ module is needed.
 """
 
-# ---------------------------------------------------------------------------
 # 1. Setup
-# ---------------------------------------------------------------------------
 import argparse
 import hashlib
 import json
@@ -53,9 +51,7 @@ from .data import (
 )
 
 
-# ---------------------------------------------------------------------------
 # 2. Choose the experiment settings
-# ---------------------------------------------------------------------------
 @dataclass
 class Config:
     """Settings shared by every candidate, so the comparison is consistent."""
@@ -115,9 +111,7 @@ def configure(config):
     tf.config.experimental.enable_op_determinism()
 
 
-# ---------------------------------------------------------------------------
 # 3. Build the MLP and calculate training-only class weights
-# ---------------------------------------------------------------------------
 def build_mlp(classes, variant, config):
     """Convert RGB pixels into one softmax score per catalogue class."""
     specification = VARIANTS[variant]
@@ -156,9 +150,7 @@ def training_class_weights(labels, n_classes):
     return {index: float(weight) for index, weight in enumerate(weights)}
 
 
-# ---------------------------------------------------------------------------
 # 4. Evaluate predictions and save figures for the report
-# ---------------------------------------------------------------------------
 def score_predictions(truth, predicted, classes):
     """Use the same class vocabulary for all candidates, including rare classes."""
     vocabulary = np.arange(len(classes))
@@ -265,9 +257,7 @@ def save_evaluation(truth, predicted, classes, metadata, output_dir, prefix):
     return metrics
 
 
-# ---------------------------------------------------------------------------
 # 5. Train one candidate and keep its best validation checkpoint
-# ---------------------------------------------------------------------------
 class ValidationMacroF1(tf.keras.callbacks.Callback):
     """Calculate macro-F1 at each epoch BEFORE checkpoint/early-stop callbacks."""
 
@@ -367,9 +357,7 @@ def fit_variant(pixels, partitions, classes, variant, config, directory, target)
     return model, probabilities, details
 
 
-# ---------------------------------------------------------------------------
 # 6. Run the optional five-class usage experiment (not submission labels)
-# ---------------------------------------------------------------------------
 def fold_usage(probabilities, classes, merged_classes):
     """Sum original scores into merged classes BEFORE choosing the largest."""
     folded = np.zeros((len(probabilities), len(merged_classes)), dtype=np.float32)
@@ -411,9 +399,7 @@ def run_usage_experiment(model, pixels, metadata, classes, winner, config, run_d
     return results
 
 
-# ---------------------------------------------------------------------------
 # 7. Compare candidates and evaluate the selected model for one target
-# ---------------------------------------------------------------------------
 def train_target(target, pixels, metadata, config, run_dir, results):
     """Select on validation only; use holdout to assess the frozen choice."""
     models_dir = run_dir / "models"
@@ -512,9 +498,7 @@ def train_target(target, pixels, metadata, config, run_dir, results):
     return selected, coverage
 
 
-# ---------------------------------------------------------------------------
 # 8. Run the complete training pipeline
-# ---------------------------------------------------------------------------
 def run_experiment(repo_root=None, run_dir=None, config=None):
     """Run both targets in a NEW folder; never overwrite an existing run."""
     config = config or Config()
@@ -587,9 +571,7 @@ def run_experiment(repo_root=None, run_dir=None, config=None):
     return run_dir
 
 
-# ---------------------------------------------------------------------------
 # 9. Read terminal options and start the pipeline
-# ---------------------------------------------------------------------------
 def parse_args():
     parser = argparse.ArgumentParser(description="Train Task 3 gender and usage MLP models.")
     parser.add_argument("--repo-root", type=Path, help="Repository containing A2_FashionDataset.")

@@ -1,17 +1,8 @@
 """
 Task 3: Check fashion images and prepare a duplicate-aware data split.
-
-HOW TO RUN (from the project root):
-    python -m tasks.task3_gender_usage.data --output-dir outputs/task3/data_check
-
-This command audits the dataset and saves a split manifest; it does NOT train
-a model. train.py imports the same functions and repeats these checks itself.
-Choose a new output directory for each check so earlier results stay intact.
 """
 
-# ---------------------------------------------------------------------------
 # 1. Setup and Task 3 targets
-# ---------------------------------------------------------------------------
 import argparse
 import hashlib
 import json
@@ -50,9 +41,7 @@ def find_root(start=None):
     )
 
 
-# ---------------------------------------------------------------------------
 # 2. Prepare images the SAME way for training and prediction
-# ---------------------------------------------------------------------------
 def prepare_image(source, size=(32, 24)):
     """Return an RGB uint8 image; size is (height, width), not PIL's order.
 
@@ -106,9 +95,7 @@ def scan_images(directory):
     return pd.DataFrame(records)
 
 
-# ---------------------------------------------------------------------------
 # 3. Audit the CSV files and images; keep usable training rows
-# ---------------------------------------------------------------------------
 def audit_data(repo_root, output_dir):
     """Save audit reports and return (clean_metadata, audit_statistics).
 
@@ -217,9 +204,7 @@ def audit_data(repo_root, output_dir):
     return clean, stats
 
 
-# ---------------------------------------------------------------------------
 # 4. Split duplicate groups, not individual images
-# ---------------------------------------------------------------------------
 def make_split(metadata, seed=42):
     """Create one reproducible train/validation/holdout split for both targets.
 
@@ -271,9 +256,7 @@ def make_split(metadata, seed=42):
     return data
 
 
-# ---------------------------------------------------------------------------
 # 5. Convert metadata into image arrays and target-specific labels
-# ---------------------------------------------------------------------------
 def load_pixels(metadata, size=(32, 24)):
     """Load uint8 pixels in exactly the same row order as metadata."""
     pixels = np.empty((len(metadata), *size, 3), dtype=np.uint8)
@@ -315,9 +298,7 @@ def target_arrays(metadata, target, classes):
     return result
 
 
-# ---------------------------------------------------------------------------
 # 6. Run a standalone data check (no TensorFlow or model training)
-# ---------------------------------------------------------------------------
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, help="Extracted repository root.")
