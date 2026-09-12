@@ -45,6 +45,11 @@ df_train = df_train.drop(columns=['Unnamed: 10','Unnamed: 11'], errors='ignore')
 # 5 rows in the csv point at images that are not in the folder, drop them
 df_train = df_train[df_train['path'].apply(os.path.exists)]
 
+# The filter above leaves gaps in the index. Retrieval maps an embedding row
+# back to a product by position, so the row numbers have to be 0..n-1 with
+# nothing missing.
+df_train = df_train.reset_index(drop = True)
+
 # The images are 60 wide by 80 tall.
 # tf.image.resize takes (height, width) so it has to be this way round.
 target_shape = (80,60)
@@ -433,12 +438,20 @@ def embed_paths(model, paths, batch_size = 32):
 def search(model, query_path, index, df, k = 5):
     """
     Embed the query then return the k closest images from the index.
+
+    The index is the whole catalogue, so a query taken from the catalogue finds
+    itself first at distance zero. That is not a retrieved neighbour, it is the
+    thing we asked about, so we pull k + 1 and drop it.
     """
     query_image = preprocess_image(query_path)
     query_emb = model(tf.expand_dims(query_image, axis = 0), training = False).numpy()
 
     distances = np.sum(np.square(index - query_emb), axis = 1)
-    nearest = np.argsort(distances)[:k]
+    nearest = np.argsort(distances)[:k + 1]
+
+    # match on path rather than distance, two identical photos would also sit
+    # at zero and those are real neighbours worth keeping
+    nearest = nearest[df['path'].to_numpy()[nearest] != query_path][:k]
 
     return df.iloc[nearest], distances[nearest]
 
@@ -515,6 +528,30 @@ def squared_distances(queries, index, chunk = 256):
     # floating point error can push a distance a hair below zero
     return np.maximum(distances, 0.0)
 
+
+def drop_self_matches(distances, index_df, query_df, top_k):
+    """
+    Rank every query and strip the query itself out of its own results.
+
+    The index is the whole catalogue, so each query is sitting in there and
+    comes back first at distance zero. Counting that as a correct retrieval
+    would hand every query one free hit and quietly inflate precision.
+
+    Ranks k + 1 deep so a query that does find itself still leaves top_k real
+    neighbours behind.
+    """
+    ordering = np.argsort(distances, axis = 1)[:, :top_k + 1]
+
+    index_paths = index_df['path'].to_numpy()
+    query_paths = query_df['path'].to_numpy()[:, None]
+
+    keep = index_paths[ordering] != query_paths
+
+    # slide the survivors left, then cut back to top_k. argsort is stable, so
+    # the ranking order is preserved
+    order = np.argsort(~keep, axis = 1, kind = 'stable')
+    return np.take_along_axis(ordering, order, axis = 1)[:, :top_k]
+
 # Help with AI for this function 
 def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
                        k_list = (1, 5, 10), map_k = 10, seed = 42):
@@ -538,7 +575,7 @@ def evaluate_retrieval(model, index, index_df, query_df, n_queries = 500,
     type_counts = index_df['articleType'].value_counts()
 
     top_k = max(max(k_list), map_k)
-    ordering = np.argsort(distances, axis = 1)[:, :top_k]
+    ordering = drop_self_matches(distances, index_df, queries, top_k)
 
     precisions = {k: [] for k in k_list}
     average_precisions = []
@@ -584,7 +621,7 @@ def precision_at_k_curve(model, index, index_df, query_df, k_max = 20,
     index_types = index_df['articleType'].to_numpy()
     query_types = queries['articleType'].to_numpy()
 
-    ordering = np.argsort(distances, axis = 1)[:, :k_max]
+    ordering = drop_self_matches(distances, index_df, queries, k_max)
     relevant = index_types[ordering] == query_types[:, None]
 
     # cumulative hits / rank gives P@K at every K in one pass
@@ -669,7 +706,7 @@ EXPERIMENTS = [
 ]
 
 ## Needed AI for this functio
-def run_experiment(config, train_df, val_df, n_queries = 500):
+def run_experiment(config, train_df, val_df, n_queries = 500, catalogue_df = None):
     """
     Train one configuration end to end and hand back its results row.
     """
@@ -690,8 +727,14 @@ def run_experiment(config, train_df, val_df, n_queries = 500):
     model, history, best_epoch = train_tuned_model(model, train_df, val_df, config)
     train_seconds = time.time() - started
 
-    index = embed_paths(model, train_df['path'].tolist(), config['batch_size'])
-    metrics = evaluate_retrieval(model, index, train_df, val_df, n_queries = n_queries)
+    # the catalogue we search is every product, not just the 80% the triplets
+    # were drawn from. fine_tune passes its subsample here so the two samplers
+    # are still compared on equal footing.
+    if catalogue_df is None:
+        catalogue_df = train_df
+
+    index = embed_paths(model, catalogue_df['path'].tolist(), config['batch_size'])
+    metrics = evaluate_retrieval(model, index, catalogue_df, val_df, n_queries = n_queries)
 
     best = history.iloc[best_epoch - 1]
     row = {
@@ -774,28 +817,42 @@ os.makedirs('outputs/task_4', exist_ok = True)
 train_df, val_df = split_data(df_train)
 
 # 2. Load the baseline model if we already trained one, otherwise train it now.
-if Path(MODEL_FILE).exists() and Path(INDEX_FILE).exists():
+#
+# The index is treated separately from the model on purpose. Embedding the
+# catalogue is a forward pass over saved weights, so a missing or stale index
+# is rebuilt on its own rather than dragging a retrain along with it.
+if Path(MODEL_FILE).exists():
     print('loading saved model')
     model = tf.keras.models.load_model(MODEL_FILE)
-    index = np.load(INDEX_FILE)
+
+    # an index built over a different number of products cannot be lined up
+    # with the catalogue row by row, so rebuild rather than trust it
+    if Path(INDEX_FILE).exists() and len(np.load(INDEX_FILE)) == len(df_train):
+        index = np.load(INDEX_FILE)
+    else:
+        print(f'building index over {len(df_train)} products')
+        index = embed_paths(model, df_train['path'].tolist())
+        np.save(INDEX_FILE, index)
 else:
     # BASE_CONFIG is the original setup - random negatives, 4 epochs, no early stopping - so this rebuilds the same baseline through the one training
     # path the file now has.
-    model, _, _, index = run_experiment(EXPERIMENTS[0], train_df, val_df)
+    model, _, _, index = run_experiment(EXPERIMENTS[0], train_df, val_df,
+                                        catalogue_df = df_train)
 
     # 3. Save both so the next run can skip straight to searching
     model.save(MODEL_FILE)
     np.save(INDEX_FILE, index)
 
-# 4. Query with a validation image, the model has never seen it
+# 4. Query with a validation image. The model never trained on it, though it is
+# in the catalogue we search, which is why search drops the self match.
 query = val_df.iloc[0]
-results, distances = search(model, query['path'], index, train_df, k = 5)
+results, distances = search(model, query['path'], index, df_train, k = 5)
 
 print(f"query: {query['articleType']}  {query['path']}")
 print(results[['id', 'articleType', 'baseColour', 'masterCategory', 'path']])
 
 # 5. Run the validation queries once, then use that same pass for both the output file and the precision score
-predictions, precision = topk_predictions(model, index, train_df, val_df, n_queries = 500)
+predictions, precision = topk_predictions(model, index, df_train, val_df, n_queries = 500)
 predictions.to_csv('outputs/task_4/task4_topk_predictions.csv', index = False)
 
 print(f"precision@5: {precision:.3f}")
@@ -813,17 +870,18 @@ if RUN_FINE_TUNE:
 if RUN_FINALISE:
     tuned_model = tf.keras.models.load_model(TUNED_MODEL_FILE)
 
-    # the full catalogue this time, not the subsample
-    tuned_index = embed_paths(tuned_model, train_df['path'].tolist())
+    # the full catalogue this time, not the subsample and not just the training
+    # split. All ~38.6k products are searchable.
+    tuned_index = embed_paths(tuned_model, df_train['path'].tolist())
     np.save(TUNED_INDEX_FILE, tuned_index)
 
     tuned_predictions, tuned_precision = topk_predictions(tuned_model, tuned_index,
-                                                          train_df, val_df, n_queries = 500)
+                                                          df_train, val_df, n_queries = 500)
     tuned_predictions.to_csv('outputs/task_4/task4_topk_predictions_tuned.csv',
                              index = False)
 
     # same query as the baseline figure, so the two grids are comparable
-    tuned_results, _ = search(tuned_model, query['path'], tuned_index, train_df, k = 5)
+    tuned_results, _ = search(tuned_model, query['path'], tuned_index, df_train, k = 5)
     show_results(query['path'], tuned_results, save_to = 'outputs/task_4/task4_query_grid_tuned.png')
 
     print(tuned_results[['id', 'articleType', 'baseColour', 'masterCategory']])
@@ -832,12 +890,19 @@ if RUN_FINALISE:
 
 
 # 9. Justification analysis - why K = 5, and evidence the embedding space is structured. Off by default because it re-embeds the validation queries.
+#
+# Run against the tuned model where it is available, because that is the one we
+# submit. Justifying K on the baseline would be describing a model we are not
+# handing in.
 if RUN_ANALYSIS:
-    curve = precision_at_k_curve(model, index, train_df, val_df)
+    analysis_model = tuned_model if RUN_FINALISE else model
+    analysis_index = tuned_index if RUN_FINALISE else index
+
+    curve = precision_at_k_curve(analysis_model, analysis_index, df_train, val_df)
     print(curve.to_string(index = False))
 
-    elbow = embedding_elbow(index)
+    elbow = embedding_elbow(analysis_index)
     print(elbow.to_string(index = False))
 
-    purity = cluster_purity(index, train_df)
+    purity = cluster_purity(analysis_index, df_train)
     print(f"mean cluster purity at k=30: {purity['purity'].mean():.3f}")
