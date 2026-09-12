@@ -705,11 +705,9 @@ EXPERIMENTS = [
     {**BASE_CONFIG, 'name': 'tuned_semihard', 'sampler': 'semihard', 'epochs': 10},
 ]
 
-## Needed AI for this functio
+# Needed AI for this functio
 def run_experiment(config, train_df, val_df, n_queries = 500, catalogue_df = None):
-    """
-    Train one configuration end to end and hand back its results row.
-    """
+
     # reseed per run so the two rows differ by the sampler and not by which
     # triplets they happened to draw
     np.random.seed(config['seed'])
@@ -760,8 +758,6 @@ def fine_tune(train_df, val_df, n_queries = 500):
     Ranked on mAP rather than val loss because margin sits inside the loss, so
     losses are only comparable within a run. Each run also drops its per-epoch
     history, which is what the learning curve in the report is drawn from.
-
-    The winner is saved alongside the original model, never over the top of it.
     """
     os.makedirs('outputs/task_4', exist_ok = True)
     os.makedirs('models/task_4', exist_ok = True)
@@ -787,20 +783,16 @@ def fine_tune(train_df, val_df, n_queries = 500):
     table.to_csv(RESULTS_FILE, index = False)
     return table
 
-# Run sample on top 30 article_type
+# Run sample on top 30 article_type 
 def subsample_catalogue(df, n_types = 30):
     """
-    A smaller catalogue for a quicker comparison, so a run takes minutes
-    instead of the best part of an hour.
-
-    Keeps the n_types largest article types, which is enough to tell the two
-    samplers apart. The winner can then be re-run on the full catalogue.
+    Use this function for the tunning process
     """
     biggest = df['articleType'].value_counts().head(n_types).index
     return df[df['articleType'].isin(biggest)].reset_index(drop = True)
 
-# SECTION 10: Setup
-RUN_FINE_TUNE = False
+# SECTION 10: Setup 
+RUN_FINE_TUNE = False ## Tuned on Means training the model
 RUN_FINALISE = True
 # The K curve and the elbow. Read only - they never touch the saved model, the index or any number already in results_task4.csv.
 RUN_ANALYSIS = False
@@ -810,17 +802,13 @@ RUN_ANALYSIS = False
 MODEL_FILE = 'models/task_4/embedding_visual_search.keras'
 INDEX_FILE = 'models/task_4/embeddings_task4.npy'
 
-os.makedirs('models/task_4', exist_ok = True)
-os.makedirs('outputs/task_4', exist_ok = True)
+os.makedirs('models/task_4', exist_ok = True) # save path 
+os.makedirs('outputs/task_4', exist_ok = True) # save path
 
 # 1. Split data
 train_df, val_df = split_data(df_train)
 
 # 2. Load the baseline model if we already trained one, otherwise train it now.
-#
-# The index is treated separately from the model on purpose. Embedding the
-# catalogue is a forward pass over saved weights, so a missing or stale index
-# is rebuilt on its own rather than dragging a retrain along with it.
 if Path(MODEL_FILE).exists():
     print('loading saved model')
     model = tf.keras.models.load_model(MODEL_FILE)
@@ -843,9 +831,8 @@ else:
     model.save(MODEL_FILE)
     np.save(INDEX_FILE, index)
 
-# 4. Query with a validation image. The model never trained on it, though it is
-# in the catalogue we search, which is why search drops the self match.
-query = val_df.iloc[0]
+# 4. Query with a validation image 
+query = val_df.iloc[10]
 results, distances = search(model, query['path'], index, df_train, k = 5)
 
 print(f"query: {query['articleType']}  {query['path']}")
@@ -867,7 +854,7 @@ if RUN_FINE_TUNE:
                         'map_at_10', 'active_fraction']])
 
 # 8. Finalise the tuned model over the full item list
-if RUN_FINALISE:
+if RUN_FINALISE: # trigger and run the fine_tuned model
     tuned_model = tf.keras.models.load_model(TUNED_MODEL_FILE)
 
     # the full catalogue this time, not the subsample and not just the training
@@ -884,16 +871,11 @@ if RUN_FINALISE:
     tuned_results, _ = search(tuned_model, query['path'], tuned_index, df_train, k = 5)
     show_results(query['path'], tuned_results, save_to = 'outputs/task_4/task4_query_grid_tuned.png')
 
-    print(tuned_results[['id', 'articleType', 'baseColour', 'masterCategory']])
+    print(tuned_results[['id', 'articleType', 'baseColour', 'masterCategory','path']])
     print(f"tuned precision@5 on the full catalogue: {tuned_precision:.3f}")
     
 
-
 # 9. Justification analysis - why K = 5, and evidence the embedding space is structured. Off by default because it re-embeds the validation queries.
-#
-# Run against the tuned model where it is available, because that is the one we
-# submit. Justifying K on the baseline would be describing a model we are not
-# handing in.
 if RUN_ANALYSIS:
     analysis_model = tuned_model if RUN_FINALISE else model
     analysis_index = tuned_index if RUN_FINALISE else index
