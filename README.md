@@ -50,8 +50,8 @@ python -m tasks.task2_season.predict
 **Task 3 — Gender & usage**
 
 ```bash
-python -m tasks.task3_gender_usage.train
-python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/final_run/models --export
+python -m tasks.task3_gender_usage.train --run-dir outputs/task3/output_run
+python -m tasks.task3_gender_usage.predict --models-dir outputs/task3/output_run/models --export
 ```
 
 **Task 4 — Visual search**
