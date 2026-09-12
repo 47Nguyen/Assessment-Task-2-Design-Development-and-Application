@@ -61,7 +61,7 @@ python tasks/task4_visual_search/task-4.py
 ```
 
 Tasks 1–3 all write into the same shared submission file,
-`outputs/COSC253_A2_SG_G9.csv`, each filling in only its own column
+`outputs/COSC2753_A2_SG_G9_Task1-3.csv`, each filling in only its own column
 (`articleType`, `season`, or `gender`/`usage`). Run them in any order — each
 run updates the file in place without touching the other tasks' columns.
 Task 4's output is separate: `outputs/task_4/task4_topk_predictions_tuned.csv`.

@@ -20,12 +20,14 @@ from PIL import Image
 from skimage.color import rgb2gray
 from skimage.feature import hog
 
-from tasks._submission import update_submission
-
 ROOT = Path(__file__).resolve().parent.parent.parent
 DATA_ROOT = ROOT / "A2_FashionDataset" / "FashionDataset"
 TEST_CSV = DATA_ROOT / "test" / "styles_prediction.csv"
 TEST_IMAGES = DATA_ROOT / "test" / "images_test"
+
+# Tasks 1-3 all fill in different columns of this one file, so each task reads
+# whatever is already there and only overwrites its own column.
+SUBMISSION_PATH = ROOT / "outputs" / "COSC2753_A2_SG_G9_Task1-3.csv"
  
 CACHE_DIR = ROOT / "cache"
 MODEL_DIR = ROOT / "models" / "task_2"
@@ -110,6 +112,29 @@ def extract_features(images):
     print(f"Saved features to {cache_path.name} (shape: {features.shape})")
     return features
  
+def update_submission(ids, columns):
+    """Fill one or more columns for the given ids in the shared submission file.
+
+    columns is {column_name: values}, same order and length as ids. Starts from
+    the official template the first time, then updates whichever file is already
+    there, so tasks can run in any order without overwriting each other.
+    """
+    source = SUBMISSION_PATH if SUBMISSION_PATH.exists() else TEST_CSV
+    table = pd.read_csv(source, dtype=str, keep_default_na=False)
+
+    ids = [str(i) for i in ids]
+    lookup = {column: dict(zip(ids, values)) for column, values in columns.items()}
+    for column, values_by_id in lookup.items():
+        table[column] = [
+            values_by_id.get(row_id, existing)
+            for row_id, existing in zip(table["id"], table[column])
+        ]
+
+    SUBMISSION_PATH.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(SUBMISSION_PATH, index=False)
+    print(f"Updated {list(columns)} for {len(ids)} rows in {SUBMISSION_PATH}")
+    return SUBMISSION_PATH
+
 def main():
     parser = argparse.ArgumentParser(description="Predict season on the test set")
     parser.add_argument("--model", choices=["base", "tune"], default="tune",

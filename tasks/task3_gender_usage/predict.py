@@ -17,7 +17,35 @@ import pandas as pd
 import tensorflow as tf
 
 from .data import TARGETS, find_root, prepare_image
-from tasks._submission import update_submission
+
+# Tasks 1-3 all fill in different columns of this one file, so each task reads
+# whatever is already there and only overwrites its own column.
+SUBMISSION_NAME = "COSC2753_A2_SG_G9_Task1-3.csv"
+
+
+def update_submission(root, official_path, ids, columns):
+    """Fill one or more columns for the given ids in the shared submission file.
+
+    columns is {column_name: values}, same order and length as ids. Starts from
+    the official template the first time, then updates whichever file is already
+    there, so tasks can run in any order without overwriting each other.
+    """
+    submission_path = root / "outputs" / SUBMISSION_NAME
+    source = submission_path if submission_path.is_file() else official_path
+    table = pd.read_csv(source, dtype=str, keep_default_na=False)
+
+    ids = [str(i) for i in ids]
+    lookup = {column: dict(zip(ids, values)) for column, values in columns.items()}
+    for column, values_by_id in lookup.items():
+        table[column] = [
+            values_by_id.get(row_id, existing)
+            for row_id, existing in zip(table["id"], table[column])
+        ]
+
+    submission_path.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(submission_path, index=False)
+    print(f"Updated {list(columns)} for {len(ids)} rows in {submission_path}")
+    return submission_path
 
 
 # 2. Load both final models and their saved class/preprocessing information
@@ -152,7 +180,7 @@ def export_submission(repo_root, models_dir):
         predicted_indices = scores[target].argmax(axis=1)
         columns[target] = classes[predicted_indices]
 
-    update_submission(official["id"], columns)
+    update_submission(root, official_path, official["id"], columns)
 
 
 # 5. Optional notebook upload demo (NOT needed for command-line execution)

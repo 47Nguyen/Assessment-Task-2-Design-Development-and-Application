@@ -15,12 +15,16 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from tensorflow.keras import layers, models
 from tqdm import tqdm
 
-from tasks._submission import update_submission
-
 SEED = 42
+ROOT = Path(__file__).resolve().parent.parent.parent
 MODEL_DIR = Path("models/task_1")
 OUTPUT_DIR = Path("outputs/task_1")
 CACHE_DIR = Path("cache")
+
+# Tasks 1-3 all fill in different columns of this one file, so each task reads
+# whatever is already there and only overwrites its own column.
+SUBMISSION_PATH = ROOT / "outputs" / "COSC2753_A2_SG_G9_Task1-3.csv"
+OFFICIAL_TEMPLATE = ROOT / "A2_FashionDataset" / "FashionDataset" / "test" / "styles_prediction.csv"
 
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -104,6 +108,31 @@ def get_split(target_value="articleType", normalised=True, verbose=True):
         
     return X_train, X_val, y_train, y_val, le
 
+def update_submission(ids, columns):
+    """Fill one or more columns for the given ids in the shared submission file.
+
+    columns is {column_name: values}, same order and length as ids. Starts from
+    the official template the first time, then updates whichever file is already
+    there, so tasks can run in any order without overwriting each other.
+    """
+    if SUBMISSION_PATH.exists():
+        table = pd.read_csv(SUBMISSION_PATH, dtype=str, keep_default_na=False)
+    else:
+        table = pd.read_csv(OFFICIAL_TEMPLATE, dtype=str, keep_default_na=False)
+
+    ids = [str(i) for i in ids]
+    lookup = {column: dict(zip(ids, values)) for column, values in columns.items()}
+    for column, values_by_id in lookup.items():
+        table[column] = [
+            values_by_id.get(row_id, existing)
+            for row_id, existing in zip(table["id"], table[column])
+        ]
+
+    SUBMISSION_PATH.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(SUBMISSION_PATH, index=False)
+    print(f"Updated {list(columns)} for {len(ids)} rows in {SUBMISSION_PATH}")
+    return SUBMISSION_PATH
+
 def build_cnn(n_classes, dropout=0.4):
     """Build the CNN used for article-type classification."""
     augmentation = tf.keras.Sequential([
@@ -138,7 +167,7 @@ def build_cnn(n_classes, dropout=0.4):
     return models.Model(inputs=inputs, outputs=outputs, name="custom_cnn_articleType")
 
 def get_default_callbacks(target_value, patience=6):
-    checkpoint_path = f"models/cnn_{target_value}.keras"
+    checkpoint_path = str(MODEL_DIR / f"cnn_{target_value}.keras")
     callbacks = [
         tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
@@ -304,8 +333,9 @@ def main():
     evaluate_model(y_val, y_pred_cnn, target_value, "cnn_custom",
                    notes="Custom CNN trained ")
     
-    model.save("models/cnn_articleType.keras")
-    print("CNN model successfully saved to: models/cnn_articleType.keras")
+    model_path = MODEL_DIR / "cnn_articleType.keras"
+    model.save(model_path)
+    print(f"CNN model successfully saved to: {model_path}")
 
     # generate predictions 
     print("\nGenerating predictions on test set...")
